@@ -8,7 +8,7 @@ part of 'account_transaction.dart';
 
 class AccountTransactionAdapter extends TypeAdapter<AccountTransaction> {
   @override
-  final int typeId = 4;
+  final int typeId = 3;
 
   @override
   AccountTransaction read(BinaryReader reader) {
@@ -24,14 +24,15 @@ class AccountTransactionAdapter extends TypeAdapter<AccountTransaction> {
       ..mainCategory = fields[4] as String
       ..subCategory = fields[5] as String
       ..amount = fields[6] as double
-      ..studentId = fields[7] as String?
-      ..employeeId = fields[8] as String?;
+      ..note = fields[7] as String?
+      ..studentId = fields[8] as String?
+      ..employeeId = fields[9] as String?;
   }
 
   @override
   void write(BinaryWriter writer, AccountTransaction obj) {
     writer
-      ..writeByte(9)
+      ..writeByte(10)
       ..writeByte(0)
       ..write(obj.journalNumber)
       ..writeByte(1)
@@ -47,8 +48,10 @@ class AccountTransactionAdapter extends TypeAdapter<AccountTransaction> {
       ..writeByte(6)
       ..write(obj.amount)
       ..writeByte(7)
-      ..write(obj.studentId)
+      ..write(obj.note)
       ..writeByte(8)
+      ..write(obj.studentId)
+      ..writeByte(9)
       ..write(obj.employeeId);
   }
 

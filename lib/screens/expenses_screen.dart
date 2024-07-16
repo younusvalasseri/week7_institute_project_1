@@ -1,27 +1,91 @@
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:week7_institute_project_1/models/category.dart';
+import 'package:intl/intl.dart';
+import 'package:week7_institute_project_1/custom_date_range_picker.dart';
+import 'package:week7_institute_project_1/generated/l10n.dart';
 import '../models/account_transaction.dart';
+import 'add_expenses_screen.dart';
 
-class ExpensesScreen extends StatelessWidget {
+class ExpensesScreen extends StatefulWidget {
   const ExpensesScreen({super.key});
+
+  @override
+  State<ExpensesScreen> createState() => _ExpensesScreenState();
+}
+
+class _ExpensesScreenState extends State<ExpensesScreen> {
+  DateTimeRange? _selectedDateRange;
+
+  void _pickDateRange(BuildContext context) async {
+    DateTimeRange? picked = await showDialog<DateTimeRange>(
+      context: context,
+      builder: (BuildContext context) {
+        return CustomDateRangePicker(initialDateRange: _selectedDateRange);
+      },
+    );
+
+    if (picked != null && picked != _selectedDateRange) {
+      setState(() {
+        _selectedDateRange = picked;
+      });
+    }
+  }
+
+  void _clearDateRange() {
+    setState(() {
+      _selectedDateRange = null;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Expenses'),
+        title: Text(S.of(context).Expenses),
       ),
       body: Column(
         children: [
           _buildSummary(),
+          _buildDateFilter(),
           Expanded(child: _buildExpensesList()),
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => _showAddExpenseDialog(context),
+        onPressed: () => Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const AddExpensesScreen()),
+        ),
         tooltip: 'Add Expense',
         child: const Icon(Icons.add),
+      ),
+    );
+  }
+
+  Widget _buildDateFilter() {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Column(
+        children: [
+          ElevatedButton(
+            onPressed: () => _pickDateRange(context),
+            child: const Text('Select Date Range'),
+          ),
+          if (_selectedDateRange != null)
+            Wrap(
+              spacing: 8.0,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: [
+                Text(
+                  '${DateFormat('dd/MMM/yyyy').format(_selectedDateRange!.start)} - ${DateFormat('dd/MMM/yyyy').format(_selectedDateRange!.end)}',
+                  style: const TextStyle(fontSize: 16),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.clear),
+                  onPressed: _clearDateRange,
+                ),
+              ],
+            ),
+        ],
       ),
     );
   }
@@ -31,9 +95,18 @@ class ExpensesScreen extends StatelessWidget {
       valueListenable:
           Hive.box<AccountTransaction>('transactions').listenable(),
       builder: (context, Box<AccountTransaction> box, _) {
-        double totalExpenses = box.values
-            .where((transaction) => transaction.category == 'Expense')
-            .fold(0, (sum, transaction) => sum + transaction.amount);
+        var filteredTransactions = box.values.where((transaction) {
+          if (transaction.category != 'Expense') {
+            return false;
+          }
+          if (_selectedDateRange == null) {
+            return true;
+          }
+          return !transaction.entryDate.isBefore(_selectedDateRange!.start) &&
+              !transaction.entryDate.isAfter(_selectedDateRange!.end);
+        }).toList();
+        double totalExpenses = filteredTransactions.fold(
+            0, (sum, transaction) => sum + transaction.amount);
 
         return Container(
           padding: const EdgeInsets.all(16),
@@ -46,7 +119,7 @@ class ExpensesScreen extends StatelessWidget {
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               Text(
-                '\$${totalExpenses.toStringAsFixed(2)}',
+                '₹ ${totalExpenses.toStringAsFixed(2)}',
                 style:
                     const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
@@ -62,12 +135,19 @@ class ExpensesScreen extends StatelessWidget {
       valueListenable:
           Hive.box<AccountTransaction>('transactions').listenable(),
       builder: (context, Box<AccountTransaction> box, _) {
-        var expenseTransactions = box.values
-            .where((transaction) => transaction.category == 'Expense')
-            .toList();
+        var expenseTransactions = box.values.where((transaction) {
+          if (transaction.category != 'Expense') {
+            return false;
+          }
+          if (_selectedDateRange == null) {
+            return true;
+          }
+          return !transaction.entryDate.isBefore(_selectedDateRange!.start) &&
+              !transaction.entryDate.isAfter(_selectedDateRange!.end);
+        }).toList();
 
         if (expenseTransactions.isEmpty) {
-          return const Center(child: Text('No expense transactions yet'));
+          return const Center(child: Text('No Expense transactions yet'));
         }
 
         return ListView.builder(
@@ -78,8 +158,13 @@ class ExpensesScreen extends StatelessWidget {
               title: Text(
                   '${transaction.mainCategory} - ${transaction.subCategory}'),
               subtitle: Text(
-                  'Amount: \$${transaction.amount.toStringAsFixed(2)}\nDate: ${transaction.entryDate.toString().split(' ')[0]}'),
-              trailing: IconButton(
+                  'Date: ${DateFormat('dd-MMM-yyyy').format(transaction.entryDate)}'),
+              trailing: Text(
+                '₹ ${transaction.amount.toStringAsFixed(2)}',
+                style:
+                    const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+              leading: IconButton(
                 icon: const Icon(Icons.delete),
                 onPressed: () => _deleteTransaction(context, transaction),
               ),
@@ -88,100 +173,6 @@ class ExpensesScreen extends StatelessWidget {
         );
       },
     );
-  }
-
-  void _showAddExpenseDialog(BuildContext context) {
-    final formKey = GlobalKey<FormState>();
-    String mainCategory = '';
-    String subCategory = '';
-    double amount = 0;
-
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Add Expense'),
-          content: Form(
-            key: formKey,
-            child: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  ValueListenableBuilder(
-                    valueListenable:
-                        Hive.box<Category>('categories').listenable(),
-                    builder: (context, Box<Category> box, _) {
-                      var expenseCategories = box.values
-                          .where((category) => category.type == 'Expense')
-                          .toList();
-                      return DropdownButtonFormField<String>(
-                        decoration:
-                            const InputDecoration(labelText: 'Main Category'),
-                        items: expenseCategories.map((Category category) {
-                          return DropdownMenuItem<String>(
-                            value: category.description,
-                            child: Text(category.description),
-                          );
-                        }).toList(),
-                        onChanged: (String? newValue) {
-                          mainCategory = newValue!;
-                        },
-                        validator: (value) => value == null ? 'Required' : null,
-                      );
-                    },
-                  ),
-                  TextFormField(
-                    decoration:
-                        const InputDecoration(labelText: 'Sub Category'),
-                    validator: (value) => value!.isEmpty ? 'Required' : null,
-                    onSaved: (value) => subCategory = value!,
-                  ),
-                  TextFormField(
-                    decoration: const InputDecoration(labelText: 'Amount'),
-                    keyboardType: TextInputType.number,
-                    validator: (value) => value!.isEmpty ? 'Required' : null,
-                    onSaved: (value) => amount = double.tryParse(value!) ?? 0,
-                  ),
-                ],
-              ),
-            ),
-          ),
-          actions: [
-            TextButton(
-              child: const Text('Cancel'),
-              onPressed: () => Navigator.of(context).pop(),
-            ),
-            TextButton(
-              child: const Text('Add'),
-              onPressed: () {
-                if (formKey.currentState!.validate()) {
-                  formKey.currentState!.save();
-                  if (mainCategory.isNotEmpty && amount > 0) {
-                    _addExpenseTransaction(mainCategory, subCategory, amount);
-                    Navigator.of(context).pop();
-                  }
-                }
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  void _addExpenseTransaction(
-      String mainCategory, String subCategory, double amount) {
-    final transactionBox = Hive.box<AccountTransaction>('transactions');
-    final newTransaction = AccountTransaction()
-      ..journalNumber = 'J${transactionBox.length + 1}'
-      ..entryNumber = 'E${transactionBox.length + 1}'
-      ..entryDate = DateTime.now()
-      ..category = 'Expense'
-      ..mainCategory = mainCategory
-      ..subCategory = subCategory
-      ..amount = amount;
-
-    transactionBox.add(newTransaction);
   }
 
   void _deleteTransaction(

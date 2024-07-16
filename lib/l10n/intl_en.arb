@@ -1,0 +1,23 @@
+{
+    "appTitle": "Institute Management App",
+    "home": "Home",
+    "reports": "Reports",
+    "settings": "Settings",
+    "add": "Add",
+    "language": "Language",
+    "darkTheme": "Dark Theme",
+    "privacyPolicy": "Privacy Policy",
+    "adminPanel": "Admin Panel",
+    "passwordReset": "Password Reset",
+    "categories": "Categories",
+    "courses": "Courses",
+    "Income": "Income",
+    "Expenses": "Expenses",
+    "Employees": "Employees",
+    "Students": "Students",
+    "Transaction": "Transaction",
+    "Categories": "Categories",
+    "AddEmployee": "Add Employee",
+    "EditEmployee": "Edit Employee",
+    "@@locale": "en"
+}

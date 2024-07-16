@@ -2,8 +2,11 @@ import 'package:hive/hive.dart';
 
 part 'filter.g.dart';
 
-@HiveType(typeId: 2)
+@HiveType(typeId: 6) // Ensure this ID is unique
 class Filter extends HiveObject {
   @HiveField(0)
-  late String type; // "income" or "expense"
+  late String name;
+
+  @HiveField(1)
+  late String criteria;
 }

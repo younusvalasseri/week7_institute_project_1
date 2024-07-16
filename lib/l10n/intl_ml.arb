@@ -1,0 +1,23 @@
+{
+    "appTitle": "ഇൻസ്റ്റിറ്റ്യൂട്ട് മാനേജ്മെന്റ് ആപ്പ്",
+    "home": "ഹോം",
+    "reports": "റിപ്പോർട്ടുകൾ",
+    "settings": "ക്രമീകരണങ്ങൾ",
+    "add": "ചേർക്കുക",
+    "language": "ഭാഷ",
+    "darkTheme": "ഡാർക്ക് തീം",
+    "privacyPolicy": "സ്വകാര്യതാനയം",
+    "adminPanel": "അഡ്മിൻ പാനൽ",
+    "passwordReset": "പാസ്വേഡ് റിസെറ്റ്",
+    "categories": "വിഭാഗങ്ങൾ",
+    "courses": "കോഴ്‌സുകൾ",
+    "Income": "വരുമാനം",
+    "Expenses": "ചെലവുകൾ",
+    "Employees": "ജീവനക്കാർ",
+    "Students": "വിദ്യാർത്ഥികൾ",
+    "Transaction": "ഇടപാടുകൾ",
+    "Categories": "വിഭാഗങ്ങൾ",
+    "AddEmployee": "ജീവനക്കാരനെ ചേർക്കുക",
+    "EditEmployee": "ജീവനക്കാരനെ എഡിറ്റ് ചെയ്യുക",
+    "@@locale": "ml"
+}

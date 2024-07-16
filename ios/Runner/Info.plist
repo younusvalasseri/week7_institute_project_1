@@ -45,5 +45,25 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>tel</string>
+		<string>mailto</string>
+		<string>sms</string>
+		<string>http</string>
+		<string>https</string>
+		<string>whatsapp</string>
+	</array>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsArbitraryLoads</key>
+		<true/>
+	</dict>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Photo access is required to send email attachments.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Camera access is required to take photos for email attachments.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Microphone access is required to send audio attachments.</string>
 </dict>
 </plist>

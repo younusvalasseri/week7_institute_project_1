@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:week7_institute_project_1/crud_operations.dart';
+import 'package:week7_institute_project_1/generated/l10n.dart';
 import '../models/category.dart';
 
 class CategoriesScreen extends StatelessWidget {
@@ -10,7 +11,7 @@ class CategoriesScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Categories'),
+        title: Text(S.of(context).categories),
       ),
       body: _buildCategoryList(),
       floatingActionButton: FloatingActionButton(
@@ -29,10 +30,14 @@ class CategoriesScreen extends StatelessWidget {
           return const Center(child: Text('No categories yet'));
         }
 
+        // Sort the categories by description
+        final sortedCategories = box.values.toList()
+          ..sort((a, b) => a.description.compareTo(b.description));
+
         return ListView.builder(
-          itemCount: box.values.length,
+          itemCount: sortedCategories.length,
           itemBuilder: (context, index) {
-            final category = box.getAt(index)!;
+            final category = sortedCategories[index];
             return ListTile(
               leading: Icon(
                 category.type == 'Income'

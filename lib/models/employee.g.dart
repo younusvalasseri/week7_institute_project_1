@@ -8,7 +8,7 @@ part of 'employee.dart';
 
 class EmployeeAdapter extends TypeAdapter<Employee> {
   @override
-  final int typeId = 0;
+  final int typeId = 2;
 
   @override
   Employee read(BinaryReader reader) {
@@ -17,24 +17,48 @@ class EmployeeAdapter extends TypeAdapter<Employee> {
       for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
     };
     return Employee()
-      ..name = fields[0] as String
-      ..position = fields[1] as String
-      ..phone = fields[2] as String
-      ..address = fields[3] as String;
+      ..empNumber = fields[0] as String
+      ..name = fields[1] as String
+      ..position = fields[2] as String
+      ..phone = fields[3] as String
+      ..address = fields[4] as String
+      ..password = fields[5] as String?
+      ..role = fields[6] as String
+      ..isActive = fields[7] as bool
+      ..profilePicture = fields[8] as String?
+      ..username = fields[9] as String?
+      ..previousSalary = fields[10] as double?
+      ..currentSalary = fields[11] as double?;
   }
 
   @override
   void write(BinaryWriter writer, Employee obj) {
     writer
-      ..writeByte(4)
+      ..writeByte(12)
       ..writeByte(0)
-      ..write(obj.name)
+      ..write(obj.empNumber)
       ..writeByte(1)
-      ..write(obj.position)
+      ..write(obj.name)
       ..writeByte(2)
-      ..write(obj.phone)
+      ..write(obj.position)
       ..writeByte(3)
-      ..write(obj.address);
+      ..write(obj.phone)
+      ..writeByte(4)
+      ..write(obj.address)
+      ..writeByte(5)
+      ..write(obj.password)
+      ..writeByte(6)
+      ..write(obj.role)
+      ..writeByte(7)
+      ..write(obj.isActive)
+      ..writeByte(8)
+      ..write(obj.profilePicture)
+      ..writeByte(9)
+      ..write(obj.username)
+      ..writeByte(10)
+      ..write(obj.previousSalary)
+      ..writeByte(11)
+      ..write(obj.currentSalary);
   }
 
   @override

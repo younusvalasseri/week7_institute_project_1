@@ -1,22 +1,62 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import '../../models/employee.dart';
+import 'package:week7_institute_project_1/generated/l10n.dart';
+import 'package:week7_institute_project_1/screens/add_employee_screen.dart';
+import '../models/employee.dart';
 import '../crud_operations.dart';
+import 'employee_details_screen.dart';
 
-class EmployeesScreen extends StatelessWidget {
-  const EmployeesScreen({super.key});
+class EmployeesScreen extends StatefulWidget {
+  final Employee currentUser;
+
+  const EmployeesScreen({super.key, required this.currentUser});
+
+  @override
+  State<EmployeesScreen> createState() => _EmployeesScreenState();
+}
+
+class _EmployeesScreenState extends State<EmployeesScreen> {
+  String _searchQuery = '';
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Employees'),
+        title: Text(S.of(context).Employees),
       ),
-      body: _buildEmployeeList(),
+      body: Column(
+        children: [
+          _buildSearchBox(),
+          Expanded(child: _buildEmployeeList()),
+        ],
+      ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => _showAddEmployeeDialog(context),
+        onPressed: () => Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const AddEmployeeScreen(),
+          ),
+        ),
         tooltip: 'Add Employee',
         child: const Icon(Icons.add),
+      ),
+    );
+  }
+
+  Widget _buildSearchBox() {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: TextField(
+        decoration: const InputDecoration(
+          labelText: 'Search by name',
+          border: OutlineInputBorder(),
+        ),
+        onChanged: (query) {
+          setState(() {
+            _searchQuery = query;
+          });
+        },
       ),
     );
   }
@@ -25,15 +65,32 @@ class EmployeesScreen extends StatelessWidget {
     return ValueListenableBuilder(
       valueListenable: Hive.box<Employee>('employees').listenable(),
       builder: (context, Box<Employee> box, _) {
-        if (box.values.isEmpty) {
+        final employees = box.values
+            .where((employee) => employee.name != 'Administrator')
+            .toList();
+
+        if (_searchQuery.isNotEmpty) {
+          employees.retainWhere((employee) =>
+              employee.name.toLowerCase().contains(_searchQuery.toLowerCase()));
+        }
+
+        if (employees.isEmpty) {
           return const Center(child: Text('No employees yet'));
         }
 
         return ListView.builder(
-          itemCount: box.values.length,
+          itemCount: employees.length,
           itemBuilder: (context, index) {
-            final employee = box.getAt(index)!;
+            final employee = employees[index];
             return ListTile(
+              leading: CircleAvatar(
+                backgroundImage: employee.profilePicture != null
+                    ? FileImage(File(employee.profilePicture!))
+                    : null,
+                child: employee.profilePicture == null
+                    ? Text(employee.name[0])
+                    : null,
+              ),
               title: Text(employee.name),
               subtitle: Text('Position: ${employee.position}'),
               trailing: Row(
@@ -41,7 +98,14 @@ class EmployeesScreen extends StatelessWidget {
                 children: [
                   IconButton(
                     icon: const Icon(Icons.edit),
-                    onPressed: () => _showEditEmployeeDialog(context, employee),
+                    onPressed: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => AddEmployeeScreen(
+                          employee: employee,
+                        ),
+                      ),
+                    ),
                   ),
                   IconButton(
                     icon: const Icon(Icons.delete),
@@ -49,147 +113,17 @@ class EmployeesScreen extends StatelessWidget {
                   ),
                 ],
               ),
-              onTap: () => _showEmployeeDetails(context, employee),
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => EmployeeDetailsScreen(
+                    employee: employee,
+                    currentUser: widget.currentUser, // Pass the currentUser
+                  ),
+                ),
+              ),
             );
           },
-        );
-      },
-    );
-  }
-
-  void _showAddEmployeeDialog(BuildContext context) {
-    final formKey = GlobalKey<FormState>();
-    String name = '', position = '', phone = '', address = '';
-
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Add Employee'),
-          content: Form(
-            key: formKey,
-            child: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  TextFormField(
-                    decoration: const InputDecoration(labelText: 'Name'),
-                    validator: (value) => value!.isEmpty ? 'Required' : null,
-                    onSaved: (value) => name = value!,
-                  ),
-                  TextFormField(
-                    decoration: const InputDecoration(labelText: 'Position'),
-                    validator: (value) => value!.isEmpty ? 'Required' : null,
-                    onSaved: (value) => position = value!,
-                  ),
-                  TextFormField(
-                    decoration: const InputDecoration(labelText: 'Phone'),
-                    onSaved: (value) => phone = value!,
-                  ),
-                  TextFormField(
-                    decoration: const InputDecoration(labelText: 'Address'),
-                    onSaved: (value) => address = value!,
-                  ),
-                ],
-              ),
-            ),
-          ),
-          actions: [
-            TextButton(
-              child: const Text('Cancel'),
-              onPressed: () => Navigator.of(context).pop(),
-            ),
-            TextButton(
-              child: const Text('Add'),
-              onPressed: () {
-                if (formKey.currentState!.validate()) {
-                  formKey.currentState!.save();
-                  _addEmployee(name, position, phone, address);
-                  Navigator.of(context).pop();
-                }
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  void _addEmployee(
-      String name, String position, String phone, String address) {
-    final newEmployee = Employee()
-      ..name = name
-      ..position = position
-      ..phone = phone
-      ..address = address;
-
-    CRUDOperations.createEmployee(newEmployee);
-  }
-
-  void _showEditEmployeeDialog(BuildContext context, Employee employee) {
-    final formKey = GlobalKey<FormState>();
-    String name = employee.name,
-        position = employee.position,
-        phone = employee.phone,
-        address = employee.address;
-
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Edit Employee'),
-          content: Form(
-            key: formKey,
-            child: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  TextFormField(
-                    initialValue: employee.name,
-                    decoration: const InputDecoration(labelText: 'Name'),
-                    validator: (value) => value!.isEmpty ? 'Required' : null,
-                    onSaved: (value) => name = value!,
-                  ),
-                  TextFormField(
-                    initialValue: employee.position,
-                    decoration: const InputDecoration(labelText: 'Position'),
-                    validator: (value) => value!.isEmpty ? 'Required' : null,
-                    onSaved: (value) => position = value!,
-                  ),
-                  TextFormField(
-                    initialValue: employee.phone,
-                    decoration: const InputDecoration(labelText: 'Phone'),
-                    onSaved: (value) => phone = value!,
-                  ),
-                  TextFormField(
-                    initialValue: employee.address,
-                    decoration: const InputDecoration(labelText: 'Address'),
-                    onSaved: (value) => address = value!,
-                  ),
-                ],
-              ),
-            ),
-          ),
-          actions: [
-            TextButton(
-              child: const Text('Cancel'),
-              onPressed: () => Navigator.of(context).pop(),
-            ),
-            TextButton(
-              child: const Text('Save'),
-              onPressed: () {
-                if (formKey.currentState!.validate()) {
-                  formKey.currentState!.save();
-                  employee.name = name;
-                  employee.position = position;
-                  employee.phone = phone;
-                  employee.address = address;
-                  CRUDOperations.updateEmployee(employee);
-                  Navigator.of(context).pop();
-                }
-              },
-            ),
-          ],
         );
       },
     );
@@ -213,34 +147,6 @@ class EmployeesScreen extends StatelessWidget {
                 CRUDOperations.deleteEmployee(employee);
                 Navigator.of(context).pop();
               },
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  void _showEmployeeDetails(BuildContext context, Employee employee) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text(employee.name),
-          content: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text('Position: ${employee.position}'),
-                Text('Phone: ${employee.phone}'),
-                Text('Address: ${employee.address}'),
-              ],
-            ),
-          ),
-          actions: [
-            TextButton(
-              child: const Text('Close'),
-              onPressed: () => Navigator.of(context).pop(),
             ),
           ],
         );

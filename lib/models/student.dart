@@ -27,4 +27,13 @@ class Student extends HiveObject {
 
   @HiveField(7)
   late String address;
+
+  @HiveField(8)
+  String? profilePicture;
+
+  @HiveField(9)
+  double? courseFee = 0;
+
+  @HiveField(10)
+  bool isDeleted = false;
 }
