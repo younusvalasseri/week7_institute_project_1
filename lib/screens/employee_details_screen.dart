@@ -4,7 +4,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../models/employee.dart';
-import 'employee_salary_details.dart'; // Import the new screen
+import 'employee_salary_details.dart';
 
 class EmployeeDetailsScreen extends StatefulWidget {
   final Employee employee;
@@ -17,7 +17,6 @@ class EmployeeDetailsScreen extends StatefulWidget {
   });
 
   @override
-  // ignore: library_private_types_in_public_api
   _EmployeeDetailsScreenState createState() => _EmployeeDetailsScreenState();
 }
 
@@ -49,6 +48,13 @@ class _EmployeeDetailsScreenState extends State<EmployeeDetailsScreen> {
       });
       await _employee.save();
     }
+  }
+
+  Future<void> _deleteProfilePicture() async {
+    setState(() {
+      _employee.profilePicture = null;
+    });
+    await _employee.save();
   }
 
   Future<void> _saveSalaries() async {
@@ -100,17 +106,31 @@ class _EmployeeDetailsScreenState extends State<EmployeeDetailsScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            GestureDetector(
-              onTap: _pickImage,
-              child: CircleAvatar(
-                radius: 60,
-                backgroundImage: _employee.profilePicture != null
-                    ? FileImage(File(_employee.profilePicture!))
-                    : null,
-                child: _employee.profilePicture == null
-                    ? const Icon(Icons.add_a_photo, size: 40)
-                    : null,
-              ),
+            Stack(
+              alignment: Alignment.center,
+              children: [
+                GestureDetector(
+                  onTap: _pickImage,
+                  child: CircleAvatar(
+                    radius: 60,
+                    backgroundImage: _employee.profilePicture != null
+                        ? FileImage(File(_employee.profilePicture!))
+                        : null,
+                    child: _employee.profilePicture == null
+                        ? const Icon(Icons.add_a_photo, size: 40)
+                        : null,
+                  ),
+                ),
+                if (_employee.profilePicture != null)
+                  Positioned(
+                    right: -10,
+                    top: -10,
+                    child: IconButton(
+                      icon: const Icon(Icons.delete, color: Colors.red),
+                      onPressed: _deleteProfilePicture,
+                    ),
+                  ),
+              ],
             ),
             const SizedBox(height: 16),
             Text(

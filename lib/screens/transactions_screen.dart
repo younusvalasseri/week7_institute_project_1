@@ -177,27 +177,45 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
               title: Text(
                   '${transaction.mainCategory} - ${transaction.subCategory}'),
               subtitle: Text(
-                  'Amount: ₹ ${transaction.amount.toStringAsFixed(2)}\nDate: ${DateFormat('dd-MMM-yyyy').format(transaction.entryDate)}'),
-              trailing: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  IconButton(
-                    icon: const Icon(Icons.edit),
-                    onPressed: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => AddTransactionScreen(
-                          transaction: transaction,
-                          index: index,
-                        ),
+                  'Date: ${DateFormat('dd-MMM-yyyy').format(transaction.entryDate)}'),
+              trailing: SizedBox(
+                width: 100, // Set a fixed width to avoid overflow
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      '₹ ${transaction.amount.toStringAsFixed(2)}',
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.delete),
-                    onPressed: () => _deleteTransaction(context, transaction),
-                  ),
-                ],
+                    Flexible(
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          IconButton(
+                            icon: const Icon(Icons.edit),
+                            onPressed: () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => AddTransactionScreen(
+                                  transaction: transaction,
+                                  index: index,
+                                ),
+                              ),
+                            ),
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.delete),
+                            onPressed: () =>
+                                _deleteTransaction(context, transaction),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               ),
             );
           },

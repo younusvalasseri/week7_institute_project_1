@@ -1,31 +1,33 @@
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:week7_institute_project_1/crud_operations.dart';
 import '../models/student.dart';
 import '../models/courses.dart';
+import '../models/employee.dart';
 
 class AddStudentScreen extends StatefulWidget {
   final Student? student;
   final int? index;
-
   const AddStudentScreen({super.key, this.student, this.index});
 
   @override
-  // ignore: library_private_types_in_public_api
   _AddStudentScreenState createState() => _AddStudentScreenState();
 }
 
 class _AddStudentScreenState extends State<AddStudentScreen> {
   final _formKey = GlobalKey<FormState>();
-  late String admNumber;
-  late String name;
-  late String course;
-  late String batch;
-  late String fatherPhone;
-  late String motherPhone;
-  late String studentPhone;
-  late String address;
+  late String admNumber,
+      name,
+      course,
+      batch,
+      fatherPhone,
+      motherPhone,
+      studentPhone,
+      address,
+      classTeacher;
   late double courseFee;
   final _coursesBox = Hive.box<Courses>('courses');
+  final _employeesBox = Hive.box<Employee>('employees');
 
   @override
   void initState() {
@@ -40,6 +42,7 @@ class _AddStudentScreenState extends State<AddStudentScreen> {
     studentPhone = student?.studentPhone ?? '';
     address = student?.address ?? '';
     courseFee = student?.courseFee ?? 0;
+    classTeacher = student?.classTeacher ?? 'Select Teacher';
   }
 
   @override
@@ -55,17 +58,14 @@ class _AddStudentScreenState extends State<AddStudentScreen> {
           child: SingleChildScrollView(
             child: Column(
               children: [
-                TextFormField(
+                buildTextFormField(
                   initialValue: admNumber,
-                  decoration:
-                      const InputDecoration(labelText: 'Admission Number'),
-                  validator: (value) => value!.isEmpty ? 'Required' : null,
+                  labelText: 'Admission Number',
                   onSaved: (value) => admNumber = value!,
                 ),
-                TextFormField(
+                buildTextFormField(
                   initialValue: name,
-                  decoration: const InputDecoration(labelText: 'Name'),
-                  validator: (value) => value!.isEmpty ? 'Required' : null,
+                  labelText: 'Name',
                   onSaved: (value) => name = value!,
                 ),
                 ValueListenableBuilder(
@@ -74,9 +74,9 @@ class _AddStudentScreenState extends State<AddStudentScreen> {
                     if (box.values.isEmpty) {
                       return const Text('No courses available');
                     }
-                    return DropdownButtonFormField<String>(
+                    return buildDropdownButtonFormField(
+                      labelText: 'Course',
                       value: course.isEmpty ? null : course,
-                      decoration: const InputDecoration(labelText: 'Course'),
                       items: box.values.map((Courses course) {
                         return DropdownMenuItem<String>(
                           value: course.courseName!,
@@ -86,50 +86,82 @@ class _AddStudentScreenState extends State<AddStudentScreen> {
                       onChanged: (String? newValue) {
                         course = newValue!;
                       },
-                      validator: (value) => value == null ? 'Required' : null,
                       onSaved: (value) => course = value!,
                     );
                   },
                 ),
-                TextFormField(
+                buildTextFormField(
                   initialValue: batch,
-                  decoration: const InputDecoration(labelText: 'Batch'),
+                  labelText: 'Batch',
                   onSaved: (value) => batch = value!,
                 ),
-                TextFormField(
+                buildTextFormField(
                   initialValue: fatherPhone,
-                  decoration:
-                      const InputDecoration(labelText: 'Father\'s Phone'),
+                  labelText: 'Father\'s Phone',
                   validator: (value) =>
                       value!.isEmpty ? null : _validatePhone(value),
                   onSaved: (value) => fatherPhone = value!,
                 ),
-                TextFormField(
+                buildTextFormField(
                   initialValue: motherPhone,
-                  decoration:
-                      const InputDecoration(labelText: 'Mother\'s Phone'),
+                  labelText: 'Mother\'s Phone',
                   validator: (value) =>
                       value!.isEmpty ? null : _validatePhone(value),
                   onSaved: (value) => motherPhone = value!,
                 ),
-                TextFormField(
+                buildTextFormField(
                   initialValue: studentPhone,
-                  decoration:
-                      const InputDecoration(labelText: 'Student\'s Phone'),
+                  labelText: 'Student\'s Phone',
                   validator: _validatePhone,
                   onSaved: (value) => studentPhone = value!,
                 ),
-                TextFormField(
+                buildTextFormField(
                   initialValue: address,
-                  decoration: const InputDecoration(labelText: 'Address'),
+                  labelText: 'Address',
                   onSaved: (value) => address = value!,
                 ),
-                TextFormField(
+                buildTextFormField(
                   initialValue: courseFee != 0 ? courseFee.toString() : '',
-                  decoration: const InputDecoration(labelText: 'Course Fee'),
+                  labelText: 'Course Fee',
                   keyboardType: TextInputType.number,
-                  validator: (value) => value!.isEmpty ? 'Required' : null,
                   onSaved: (value) => courseFee = double.tryParse(value!) ?? 0,
+                ),
+                ValueListenableBuilder(
+                  valueListenable: _employeesBox.listenable(),
+                  builder: (context, Box<Employee> box, _) {
+                    List<DropdownMenuItem<String>> items = [
+                      const DropdownMenuItem(
+                        value: 'Select Teacher',
+                        child: Text('Select Teacher'),
+                      ),
+                      ...box.values
+                          .where((employee) => employee.position == 'Faculty')
+                          .map((employee) {
+                        return DropdownMenuItem<String>(
+                          value: employee.empNumber,
+                          child: Text(employee.name),
+                        );
+                      }).toList(),
+                    ];
+
+                    if (!items.any((item) => item.value == classTeacher)) {
+                      classTeacher = 'Select Teacher';
+                    }
+
+                    return buildDropdownButtonFormField(
+                      labelText: 'Class Teacher',
+                      value: classTeacher,
+                      items: items,
+                      onChanged: (String? newValue) {
+                        setState(() {
+                          classTeacher = newValue!;
+                        });
+                      },
+                      onSaved: (value) => classTeacher = value!,
+                      validator: (value) =>
+                          value == 'Select Teacher' ? 'Required' : null,
+                    );
+                  },
                 ),
               ],
             ),
@@ -143,7 +175,41 @@ class _AddStudentScreenState extends State<AddStudentScreen> {
     );
   }
 
-  void _saveStudent() {
+  Widget buildTextFormField({
+    required String initialValue,
+    required String labelText,
+    required Function(String?) onSaved,
+    TextInputType keyboardType = TextInputType.text,
+    String? Function(String?)? validator,
+  }) {
+    return TextFormField(
+      initialValue: initialValue,
+      decoration: InputDecoration(labelText: labelText),
+      keyboardType: keyboardType,
+      validator: validator ?? (value) => value!.isEmpty ? 'Required' : null,
+      onSaved: onSaved,
+    );
+  }
+
+  Widget buildDropdownButtonFormField({
+    required String labelText,
+    required String? value,
+    required List<DropdownMenuItem<String>> items,
+    required Function(String?) onChanged,
+    Function(String?)? onSaved,
+    String? Function(String?)? validator,
+  }) {
+    return DropdownButtonFormField<String>(
+      value: value,
+      decoration: InputDecoration(labelText: labelText),
+      items: items,
+      onChanged: onChanged,
+      onSaved: onSaved,
+      validator: validator ?? (value) => value == null ? 'Required' : null,
+    );
+  }
+
+  void _saveStudent() async {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
       final newStudent = Student()
@@ -155,17 +221,18 @@ class _AddStudentScreenState extends State<AddStudentScreen> {
         ..motherPhone = motherPhone
         ..studentPhone = studentPhone
         ..address = address
-        ..courseFee = courseFee;
+        ..courseFee = courseFee
+        ..classTeacher = classTeacher;
 
-      final studentsBox = Hive.box<Student>('students');
+      final navigator = Navigator.of(context); // Store the navigator context
 
       if (widget.student == null) {
-        studentsBox.add(newStudent);
+        CRUDOperations.createStudent(newStudent);
       } else {
-        studentsBox.putAt(widget.index!, newStudent);
+        await CRUDOperations.updateStudents(widget.student!.key, newStudent);
       }
 
-      Navigator.of(context).pop();
+      navigator.pop(); // Use the stored navigator context
     }
   }
 

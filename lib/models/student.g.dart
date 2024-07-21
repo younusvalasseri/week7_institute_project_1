@@ -27,13 +27,14 @@ class StudentAdapter extends TypeAdapter<Student> {
       ..address = fields[7] as String
       ..profilePicture = fields[8] as String?
       ..courseFee = fields[9] as double?
-      ..isDeleted = fields[10] as bool;
+      ..isDeleted = fields[10] as bool
+      ..classTeacher = fields[11] as String?;
   }
 
   @override
   void write(BinaryWriter writer, Student obj) {
     writer
-      ..writeByte(11)
+      ..writeByte(12)
       ..writeByte(0)
       ..write(obj.admNumber)
       ..writeByte(1)
@@ -55,7 +56,9 @@ class StudentAdapter extends TypeAdapter<Student> {
       ..writeByte(9)
       ..write(obj.courseFee)
       ..writeByte(10)
-      ..write(obj.isDeleted);
+      ..write(obj.isDeleted)
+      ..writeByte(11)
+      ..write(obj.classTeacher);
   }
 
   @override

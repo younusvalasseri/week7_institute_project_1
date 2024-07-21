@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:hive_flutter/hive_flutter.dart';
 import '../models/account_transaction.dart';
 import '../models/category.dart';
 import '../models/student.dart';
 import '../models/employee.dart';
+import '../crud_operations.dart';
 
 class AddExpensesScreen extends StatefulWidget {
   final AccountTransaction? transaction;
   final int? index;
-
-  const AddExpensesScreen({super.key, this.transaction, this.index});
+  final Employee currentUser;
+  const AddExpensesScreen(
+      {super.key, this.transaction, this.index, required this.currentUser});
 
   @override
   // ignore: library_private_types_in_public_api
@@ -83,8 +84,7 @@ class _AddExpensesScreenState extends State<AddExpensesScreen> {
               buildDropdownButtonFormField<Category>(
                 labelText: 'Main Category',
                 value: mainCategory.isEmpty ? null : mainCategory,
-                items: Hive.box<Category>('categories')
-                    .values
+                items: CRUDOperations.readAllCategories()
                     .where((category) => category.type == 'Expense')
                     .map((category) => DropdownMenuItem<String>(
                           value: category.description,
@@ -115,28 +115,7 @@ class _AddExpensesScreenState extends State<AddExpensesScreen> {
                 initialValue: note ?? '',
                 onSaved: (value) => note = value,
               ),
-              buildDropdownButtonFormField<Student>(
-                labelText: 'Student',
-                value: studentId,
-                items: [
-                  const DropdownMenuItem(
-                    value: 'Select Item',
-                    child: Text('Select Item'),
-                  ),
-                  ...Hive.box<Student>('students')
-                      .values
-                      .map((student) => DropdownMenuItem<String>(
-                            value: student.admNumber,
-                            child: Text(student.name),
-                          )),
-                ],
-                onChanged: (String? newValue) {
-                  setState(() {
-                    studentId = newValue!;
-                  });
-                },
-                onSaved: (value) => studentId = value,
-              ),
+              buildStudentDropdown(),
               buildDropdownButtonFormField<Employee>(
                 labelText: 'Employee',
                 value: employeeId,
@@ -145,8 +124,8 @@ class _AddExpensesScreenState extends State<AddExpensesScreen> {
                     value: 'Select Item',
                     child: Text('Select Item'),
                   ),
-                  ...Hive.box<Employee>('employees')
-                      .values
+                  ...CRUDOperations.readAllEmployees()
+                      .where((employee) => employee.isActive)
                       .map((employee) => DropdownMenuItem<String>(
                             value: employee.key.toString(),
                             child: Text(employee.name),
@@ -229,6 +208,39 @@ class _AddExpensesScreenState extends State<AddExpensesScreen> {
     );
   }
 
+  Widget buildStudentDropdown() {
+    List<Student> students = CRUDOperations.readAllStudents()
+        .where((student) => !student.isDeleted)
+        .toList();
+    if (widget.currentUser.position == 'Faculty') {
+      students = students
+          .where(
+              (student) => student.classTeacher == widget.currentUser.empNumber)
+          .toList();
+    }
+
+    return buildDropdownButtonFormField<Student>(
+      labelText: 'Student',
+      value: studentId,
+      items: [
+        const DropdownMenuItem(
+          value: 'Select Item',
+          child: Text('Select Item'),
+        ),
+        ...students.map((student) => DropdownMenuItem<String>(
+              value: student.admNumber,
+              child: Text(student.name),
+            )),
+      ],
+      onChanged: (String? newValue) {
+        setState(() {
+          studentId = newValue!;
+        });
+      },
+      onSaved: (value) => studentId = value,
+    );
+  }
+
   void _saveExpense() {
     if (formKey.currentState!.validate()) {
       formKey.currentState!.save();
@@ -245,10 +257,10 @@ class _AddExpensesScreenState extends State<AddExpensesScreen> {
         ..employeeId = employeeId != 'Select Item' ? employeeId : null;
 
       if (widget.transaction == null) {
-        Hive.box<AccountTransaction>('transactions').add(newTransaction);
+        CRUDOperations.createTransaction(newTransaction);
       } else {
-        Hive.box<AccountTransaction>('transactions')
-            .put(widget.transaction!.key, newTransaction);
+        CRUDOperations.updateTransactionWithKey(
+            widget.transaction!.key as int, newTransaction);
       }
 
       Navigator.of(context).pop();

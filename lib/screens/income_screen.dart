@@ -4,10 +4,14 @@ import 'package:intl/intl.dart';
 import 'package:week7_institute_project_1/custom_date_range_picker.dart';
 import 'package:week7_institute_project_1/generated/l10n.dart';
 import 'package:week7_institute_project_1/models/account_transaction.dart';
+import 'package:week7_institute_project_1/models/student.dart';
+import 'package:week7_institute_project_1/models/employee.dart';
 import 'package:week7_institute_project_1/screens/add_income_screen.dart';
 
 class IncomeScreen extends StatefulWidget {
-  const IncomeScreen({super.key});
+  final Employee currentUser;
+
+  const IncomeScreen({super.key, required this.currentUser});
 
   @override
   State<IncomeScreen> createState() => _IncomeScreenState();
@@ -54,7 +58,8 @@ class _IncomeScreenState extends State<IncomeScreen> {
         onPressed: () => Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => const AddIncomeScreen(),
+            builder: (context) =>
+                AddIncomeScreen(currentUser: widget.currentUser),
           ),
         ),
         tooltip: 'Add Income',
@@ -149,6 +154,18 @@ class _IncomeScreenState extends State<IncomeScreen> {
               !transaction.entryDate.isAfter(_selectedDateRange!.end);
         }).toList();
 
+        if (widget.currentUser.position == 'Faculty') {
+          var students = Hive.box<Student>('students')
+              .values
+              .where((student) =>
+                  student.classTeacher == widget.currentUser.empNumber)
+              .map((student) => student.admNumber)
+              .toList();
+          incomeTransactions = incomeTransactions
+              .where((transaction) => students.contains(transaction.studentId))
+              .toList();
+        }
+
         if (incomeTransactions.isEmpty) {
           return const Center(child: Text('No income transactions yet'));
         }
@@ -157,19 +174,68 @@ class _IncomeScreenState extends State<IncomeScreen> {
           itemCount: incomeTransactions.length,
           itemBuilder: (context, index) {
             var transaction = incomeTransactions[index];
-            return ListTile(
-              title: Text(
-                  '${transaction.mainCategory} - ${transaction.subCategory}'),
-              subtitle: Text(
-                  'Date: ${DateFormat('dd-MMM-yyyy').format(transaction.entryDate)}'),
-              trailing: Text(
-                '₹ ${transaction.amount.toStringAsFixed(2)}',
-                style:
-                    const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-              ),
-              leading: IconButton(
-                icon: const Icon(Icons.delete),
-                onPressed: () => _deleteTransaction(context, transaction),
+            return Card(
+              margin:
+                  const EdgeInsets.symmetric(vertical: 4.0, horizontal: 8.0),
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            '${transaction.mainCategory} - ${transaction.subCategory}',
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            'Date: ${DateFormat('dd-MMM-yyyy').format(transaction.entryDate)}',
+                            style: const TextStyle(fontSize: 14),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Column(
+                      children: [
+                        Text(
+                          '₹ ${transaction.amount.toStringAsFixed(2)}',
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        Row(
+                          children: [
+                            IconButton(
+                              icon: const Icon(Icons.edit),
+                              onPressed: () => Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => AddIncomeScreen(
+                                    currentUser: widget.currentUser,
+                                    transaction: transaction,
+                                    index: index,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.delete),
+                              onPressed: () =>
+                                  _deleteTransaction(context, transaction),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
             );
           },

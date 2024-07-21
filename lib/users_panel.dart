@@ -58,7 +58,11 @@ class _UsersPanelState extends State<UsersPanel> {
                   ),
                   DropdownButtonFormField<String>(
                     value: role,
-                    items: ['Admin', 'User', 'General'].map((String value) {
+                    items: [
+                      'Admin',
+                      'User',
+                      'General',
+                    ].map((String value) {
                       return DropdownMenuItem<String>(
                         value: value,
                         child: Text(value),

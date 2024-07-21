@@ -36,4 +36,7 @@ class Student extends HiveObject {
 
   @HiveField(10)
   bool isDeleted = false;
+
+  @HiveField(11)
+  String? classTeacher; // Added field
 }

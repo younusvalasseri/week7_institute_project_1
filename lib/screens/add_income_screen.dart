@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:week7_institute_project_1/crud_operations.dart';
 import 'package:week7_institute_project_1/models/account_transaction.dart';
 import 'package:week7_institute_project_1/models/category.dart';
 import 'package:week7_institute_project_1/models/student.dart';
@@ -9,8 +10,10 @@ import 'package:intl/intl.dart';
 class AddIncomeScreen extends StatefulWidget {
   final AccountTransaction? transaction;
   final int? index;
+  final Employee currentUser;
 
-  const AddIncomeScreen({super.key, this.transaction, this.index});
+  const AddIncomeScreen(
+      {super.key, this.transaction, this.index, required this.currentUser});
 
   @override
   // ignore: library_private_types_in_public_api
@@ -40,8 +43,8 @@ class _AddIncomeScreenState extends State<AddIncomeScreen> {
     subCategory = transaction?.subCategory ?? '';
     amount = transaction?.amount ?? 0;
     note = transaction?.note ?? '';
-    studentId = transaction?.studentId ?? 'Select Item';
-    employeeId = transaction?.employeeId ?? 'Select Item';
+    studentId = transaction?.studentId;
+    employeeId = transaction?.employeeId;
   }
 
   @override
@@ -82,7 +85,7 @@ class _AddIncomeScreenState extends State<AddIncomeScreen> {
               ),
               buildDropdownButtonFormField<Category>(
                 labelText: 'Main Category',
-                value: mainCategory.isNotEmpty ? mainCategory : null,
+                value: mainCategory.isEmpty ? null : mainCategory,
                 items: Hive.box<Category>('categories')
                     .values
                     .where((category) => category.type == 'Income')
@@ -115,49 +118,87 @@ class _AddIncomeScreenState extends State<AddIncomeScreen> {
                 initialValue: note ?? '',
                 onSaved: (value) => note = value,
               ),
-              buildDropdownButtonFormField<Student>(
-                labelText: 'Student',
-                value: studentId,
-                items: [
-                  const DropdownMenuItem(
-                    value: 'Select Item',
-                    child: Text('Select Item'),
-                  ),
-                  ...Hive.box<Student>('students')
-                      .values
-                      .map((student) => DropdownMenuItem<String>(
-                            value: student.admNumber,
-                            child: Text(student.name),
-                          )),
-                ],
-                onChanged: (String? newValue) {
-                  setState(() {
-                    studentId = newValue!;
-                  });
+              ValueListenableBuilder(
+                valueListenable: Hive.box<Student>('students').listenable(),
+                builder: (context, Box<Student> box, _) {
+                  List<Student> students = box.values
+                      .toList()
+                      .where((student) => !student.isDeleted)
+                      .toList();
+
+                  if (widget.currentUser.position == 'Faculty') {
+                    students = students
+                        .where((student) =>
+                            student.classTeacher ==
+                            widget.currentUser.empNumber)
+                        .toList();
+                  }
+
+                  List<DropdownMenuItem<String>> items = [
+                    const DropdownMenuItem(
+                      value: null,
+                      child: Text('Select Item'),
+                    ),
+                    ...students.map((student) {
+                      return DropdownMenuItem<String>(
+                        value: student.admNumber,
+                        child: Text(student.name),
+                      );
+                    }).toList(),
+                  ];
+
+                  if (!items.any((item) => item.value == studentId)) {
+                    studentId = null;
+                  }
+
+                  return buildDropdownButtonFormField(
+                    labelText: 'Student',
+                    value: studentId,
+                    items: items,
+                    onChanged: (String? newValue) {
+                      setState(() {
+                        studentId = newValue!;
+                      });
+                    },
+                    onSaved: (value) => studentId = value,
+                  );
                 },
-                onSaved: (value) => studentId = value,
               ),
-              buildDropdownButtonFormField<Employee>(
-                labelText: 'Employee',
-                value: employeeId,
-                items: [
-                  const DropdownMenuItem(
-                    value: 'Select Item',
-                    child: Text('Select Item'),
-                  ),
-                  ...Hive.box<Employee>('employees')
-                      .values
-                      .map((employee) => DropdownMenuItem<String>(
-                            value: employee.key.toString(),
-                            child: Text(employee.name),
-                          )),
-                ],
-                onChanged: (String? newValue) {
-                  setState(() {
-                    employeeId = newValue!;
-                  });
+              ValueListenableBuilder(
+                valueListenable: Hive.box<Employee>('employees').listenable(),
+                builder: (context, Box<Employee> box, _) {
+                  List<Employee> employees = box.values
+                      .where((employee) => employee.isActive)
+                      .toList();
+                  List<DropdownMenuItem<String>> items = [
+                    const DropdownMenuItem(
+                      value: null,
+                      child: Text('Select Item'),
+                    ),
+                    ...employees.map((employee) {
+                      return DropdownMenuItem<String>(
+                        value: employee.empNumber,
+                        child: Text(employee.name),
+                      );
+                    }).toList(),
+                  ];
+
+                  if (!items.any((item) => item.value == employeeId)) {
+                    employeeId = null;
+                  }
+
+                  return buildDropdownButtonFormField(
+                    labelText: 'Employee',
+                    value: employeeId,
+                    items: items,
+                    onChanged: (String? newValue) {
+                      setState(() {
+                        employeeId = newValue!;
+                      });
+                    },
+                    onSaved: (value) => employeeId = value,
+                  );
                 },
-                onSaved: (value) => employeeId = value,
               ),
             ],
           ),
@@ -241,14 +282,14 @@ class _AddIncomeScreenState extends State<AddIncomeScreen> {
         ..subCategory = subCategory
         ..amount = amount
         ..note = note
-        ..studentId = studentId != 'Select Item' ? studentId : null
-        ..employeeId = employeeId != 'Select Item' ? employeeId : null;
+        ..studentId = studentId
+        ..employeeId = employeeId;
 
       if (widget.transaction == null) {
-        Hive.box<AccountTransaction>('transactions').add(newTransaction);
+        CRUDOperations.createTransaction(newTransaction);
       } else {
-        Hive.box<AccountTransaction>('transactions')
-            .put(widget.transaction!.key, newTransaction);
+        CRUDOperations.updateTransactionWithKey(
+            widget.transaction!.key as int, newTransaction);
       }
 
       Navigator.of(context).pop();

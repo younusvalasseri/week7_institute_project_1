@@ -48,18 +48,10 @@ class Employee extends HiveObject {
     address = '';
     password = null;
     role = 'General';
-    isActive = true;
+    isActive = true; // Ensure isActive is set to true by default
     username = null;
-    profilePicture = '';
+    profilePicture = null;
     previousSalary = 0.0;
     currentSalary = 0.0;
-  }
-
-  @override
-  Future<void> save() async {
-    if (username == 'admin') {
-      profilePicture = 'assets/iat_logo.jpg';
-    }
-    await super.save();
   }
 }

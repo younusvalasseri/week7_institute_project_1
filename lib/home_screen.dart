@@ -76,8 +76,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       radius: 30,
                       backgroundImage: widget.currentUser.profilePicture != null
                           ? FileImage(File(widget.currentUser.profilePicture!))
-                          : const AssetImage('assets/iat_logo.jpg')
-                              as ImageProvider,
+                          : const AssetImage('assets/iat_logo.jpg'),
                     ),
                     const CircleAvatar(
                       radius: 30,
@@ -131,11 +130,11 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Column(
           children: [
             _buildCard(context, S.of(context).Income, Icons.arrow_upward,
-                const IncomeScreen(),
+                IncomeScreen(currentUser: widget.currentUser),
                 color: Colors.green),
             const SizedBox(height: 15),
             _buildCard(context, S.of(context).Expenses, Icons.arrow_downward,
-                const ExpensesScreen(),
+                ExpensesScreen(currentUser: widget.currentUser),
                 color: Colors.red),
             const SizedBox(height: 15),
             _buildCard(
@@ -155,8 +154,11 @@ class _HomeScreenState extends State<HomeScreen> {
                 color: Colors.amber),
             const SizedBox(height: 15),
             if (widget.currentUser.username == 'admin') // Show only for admin
-              _buildCard(context, S.of(context).adminPanel,
-                  Icons.admin_panel_settings, const AdminScreen(),
+              _buildCard(
+                  context,
+                  S.of(context).adminPanel,
+                  Icons.admin_panel_settings,
+                  AdminScreen(currentUser: widget.currentUser),
                   color: Colors.red),
           ],
         ),

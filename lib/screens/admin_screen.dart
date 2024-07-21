@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:week7_institute_project_1/models/employee.dart';
 import 'package:week7_institute_project_1/screens/categories_screen.dart';
 import 'package:week7_institute_project_1/password_reset_page.dart';
 import 'package:week7_institute_project_1/users_panel.dart';
 import 'course_details.dart';
 
 class AdminScreen extends StatelessWidget {
-  const AdminScreen({super.key});
+  const AdminScreen({super.key, required Employee currentUser});
 
   @override
   Widget build(BuildContext context) {

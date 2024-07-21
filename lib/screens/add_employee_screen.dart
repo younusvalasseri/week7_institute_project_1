@@ -5,8 +5,8 @@ import '../crud_operations.dart';
 
 class AddEmployeeScreen extends StatefulWidget {
   final Employee? employee;
-
-  const AddEmployeeScreen({super.key, this.employee});
+  final int? index;
+  const AddEmployeeScreen({super.key, this.employee, this.index});
 
   @override
   // ignore: library_private_types_in_public_api
@@ -89,7 +89,7 @@ class _AddEmployeeScreenState extends State<AddEmployeeScreen> {
     );
   }
 
-  void _saveEmployee() {
+  void _saveEmployee() async {
     if (formKey.currentState!.validate()) {
       formKey.currentState!.save();
       final newEmployee = Employee()
@@ -102,20 +102,14 @@ class _AddEmployeeScreenState extends State<AddEmployeeScreen> {
         ..isActive = isActive;
 
       if (widget.employee == null) {
-        CRUDOperations.createEmployee(newEmployee);
+        await CRUDOperations.createEmployee(newEmployee);
       } else {
-        widget.employee!
-          ..empNumber = empNumber
-          ..name = name
-          ..position = position
-          ..phone = phone
-          ..address = address
-          ..role = role
-          ..isActive = isActive;
-        widget.employee!.save();
+        await CRUDOperations.updateEmployee(widget.employee!.key, newEmployee);
       }
 
-      Navigator.of(context).pop();
+      if (mounted) {
+        Navigator.of(context).pop();
+      }
     }
   }
 

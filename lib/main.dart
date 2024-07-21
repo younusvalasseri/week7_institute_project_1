@@ -6,7 +6,6 @@ import 'package:week7_institute_project_1/models/student.dart';
 import 'package:week7_institute_project_1/models/employee.dart';
 import 'package:week7_institute_project_1/models/account_transaction.dart';
 import 'package:week7_institute_project_1/models/category.dart';
-import 'package:week7_institute_project_1/models/filter.dart';
 import 'package:week7_institute_project_1/login_page.dart';
 import 'package:week7_institute_project_1/registration_page.dart';
 import 'package:week7_institute_project_1/password_reset_page.dart';
@@ -25,7 +24,6 @@ void main() async {
   Hive.registerAdapter(AccountTransactionAdapter());
   Hive.registerAdapter(CoursesAdapter());
   Hive.registerAdapter(EmployeeAdapter());
-  Hive.registerAdapter(FilterAdapter());
   Hive.registerAdapter(StudentAdapter());
 
   // Open the boxes
@@ -33,7 +31,6 @@ void main() async {
   await Hive.openBox<AccountTransaction>('transactions');
   await Hive.openBox<Courses>('courses');
   await Hive.openBox<Employee>('employees');
-  await Hive.openBox<Filter>('filters');
   await Hive.openBox<Student>('students');
 
   // Ensure the admin user exists
@@ -75,8 +72,7 @@ class MyApp extends StatefulWidget {
   const MyApp({super.key});
 
   @override
-  // ignore: library_private_types_in_public_api
-  _MyAppState createState() => _MyAppState();
+  State<MyApp> createState() => _MyAppState();
 }
 
 class _MyAppState extends State<MyApp> {

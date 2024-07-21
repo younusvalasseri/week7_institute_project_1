@@ -38,7 +38,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
     entryNumber = transaction?.entryNumber ?? '';
     entryDate = transaction?.entryDate ?? DateTime.now();
     category = transaction?.category ?? 'Select Item';
-    mainCategory = transaction?.mainCategory ?? '';
+    mainCategory = transaction?.mainCategory ?? 'Select Item';
     subCategory = transaction?.subCategory ?? '';
     amount = transaction?.amount ?? 0;
     note = transaction?.note ?? '';
@@ -121,10 +121,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                       .toLowerCase()
                       .compareTo(b.description.toLowerCase()));
 
-                  // Ensure mainCategory has a valid initial value
-                  if (mainCategory.isEmpty ||
-                      (!categories.any((c) => c.description == mainCategory) &&
-                          mainCategory != 'Select Item')) {
+                  if (!categories.any((c) => c.description == mainCategory)) {
                     mainCategory = 'Select Item';
                   }
 
@@ -174,6 +171,14 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
               ValueListenableBuilder(
                 valueListenable: Hive.box<Student>('students').listenable(),
                 builder: (context, Box<Student> box, _) {
+                  var students = box.values
+                      .toList()
+                      .where((student) => !student.isDeleted)
+                      .toList();
+                  if (!students.any((s) => s.admNumber == studentId)) {
+                    studentId = 'Select Item';
+                  }
+
                   return DropdownButtonFormField<String>(
                     value: studentId,
                     decoration: const InputDecoration(labelText: 'Student'),
@@ -182,7 +187,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                         value: 'Select Item',
                         child: Text('Select Item'),
                       ),
-                      ...box.values.map((Student student) {
+                      ...students.map((Student student) {
                         return DropdownMenuItem<String>(
                           value: student.admNumber,
                           child: Text(student.name),
@@ -201,6 +206,13 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
               ValueListenableBuilder(
                 valueListenable: Hive.box<Employee>('employees').listenable(),
                 builder: (context, Box<Employee> box, _) {
+                  var employees = box.values
+                      .where((employee) => employee.isActive)
+                      .toList();
+                  if (!employees.any((e) => e.empNumber == employeeId)) {
+                    employeeId = 'Select Item';
+                  }
+
                   return DropdownButtonFormField<String>(
                     value: employeeId,
                     decoration: const InputDecoration(labelText: 'Employee'),
@@ -209,7 +221,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                         value: 'Select Item',
                         child: Text('Select Item'),
                       ),
-                      ...box.values.map((Employee employee) {
+                      ...employees.map((Employee employee) {
                         return DropdownMenuItem<String>(
                           value: employee.empNumber,
                           child: Text(employee.name),

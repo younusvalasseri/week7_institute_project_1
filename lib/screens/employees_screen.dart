@@ -4,7 +4,7 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:week7_institute_project_1/generated/l10n.dart';
 import 'package:week7_institute_project_1/screens/add_employee_screen.dart';
 import '../models/employee.dart';
-import '../crud_operations.dart';
+// import '../crud_operations.dart';
 import 'employee_details_screen.dart';
 
 class EmployeesScreen extends StatefulWidget {
@@ -65,9 +65,15 @@ class _EmployeesScreenState extends State<EmployeesScreen> {
     return ValueListenableBuilder(
       valueListenable: Hive.box<Employee>('employees').listenable(),
       builder: (context, Box<Employee> box, _) {
-        final employees = box.values
-            .where((employee) => employee.name != 'Administrator')
-            .toList();
+        List<Employee> employees;
+        if (widget.currentUser.username == 'admin') {
+          employees = box.values.toList();
+        } else {
+          employees = box.values
+              .where((employee) =>
+                  employee.isActive && employee.name != 'Administrator')
+              .toList();
+        }
 
         if (_searchQuery.isNotEmpty) {
           employees.retainWhere((employee) =>
@@ -109,7 +115,7 @@ class _EmployeesScreenState extends State<EmployeesScreen> {
                   ),
                   IconButton(
                     icon: const Icon(Icons.delete),
-                    onPressed: () => _deleteEmployee(context, employee),
+                    onPressed: () => _softDeleteEmployee(context, employee),
                   ),
                 ],
               ),
@@ -118,7 +124,7 @@ class _EmployeesScreenState extends State<EmployeesScreen> {
                 MaterialPageRoute(
                   builder: (context) => EmployeeDetailsScreen(
                     employee: employee,
-                    currentUser: widget.currentUser, // Pass the currentUser
+                    currentUser: widget.currentUser,
                   ),
                 ),
               ),
@@ -129,7 +135,7 @@ class _EmployeesScreenState extends State<EmployeesScreen> {
     );
   }
 
-  void _deleteEmployee(BuildContext context, Employee employee) {
+  void _softDeleteEmployee(BuildContext context, Employee employee) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -144,7 +150,10 @@ class _EmployeesScreenState extends State<EmployeesScreen> {
             TextButton(
               child: const Text('Delete'),
               onPressed: () {
-                CRUDOperations.deleteEmployee(employee);
+                setState(() {
+                  employee.isActive = false;
+                  employee.save();
+                });
                 Navigator.of(context).pop();
               },
             ),

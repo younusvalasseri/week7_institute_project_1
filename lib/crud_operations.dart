@@ -11,18 +11,13 @@ class CRUDOperations {
     return box.values.toList();
   }
 
-  // transactions - add-new line
+  // transactions - add-new line - Update
   static Future<void> createTransaction(AccountTransaction transaction) async {
     final box = Hive.box<AccountTransaction>('transactions');
     await box.add(transaction);
   }
 
-  // transactions - Update
-  static Future<void> updateTransaction(AccountTransaction transaction) async {
-    await transaction.save();
-  }
-
-//transactions - Edit current line
+//transactions - Edit current line - Update
   static Future<void> updateTransactionWithKey(
       int key, AccountTransaction transaction) async {
     final box = Hive.box<AccountTransaction>('transactions');
@@ -40,15 +35,10 @@ class CRUDOperations {
     return box.values.toList();
   }
 
-  // Categories - add - new line
+  // Categories - add - new line - Update
   static Future<void> createCategory(Category category) async {
     final box = Hive.box<Category>('categories');
     await box.add(category);
-  }
-
-  // Categories - Update
-  static Future<void> updateCategory(Category category) async {
-    await category.save();
   }
 
   // Categories - Delete
@@ -62,15 +52,16 @@ class CRUDOperations {
     return box.values.toList();
   }
 
+  // Students - Update
+  static Future<void> updateStudents(int key, Student students) async {
+    final box = Hive.box<Student>('students');
+    await box.put(key, students);
+  }
+
   // Students- Add new line
   static Future<void> createStudent(Student student) async {
     final box = Hive.box<Student>('students');
     await box.add(student);
-  }
-
-  // Students - update
-  static Future<void> updateStudent(Student student) async {
-    await student.save();
   }
 
   // Students - Delete
@@ -84,15 +75,16 @@ class CRUDOperations {
     return box.values.toList();
   }
 
+  // Employees - Update
+  static Future<void> updateEmployee(int key, Employee employee) async {
+    final box = Hive.box<Employee>('employees');
+    await box.put(key, employee);
+  }
+
   // Employees - Add new line
   static Future<void> createEmployee(Employee employee) async {
     final box = Hive.box<Employee>('employees');
     await box.add(employee);
-  }
-
-  // Employees - update
-  static Future<void> updateEmployee(Employee employee) async {
-    await employee.save();
   }
 
 // Employees - Delete

@@ -11,6 +11,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:intl/intl.dart';
 import '../models/account_transaction.dart';
 import '../models/student.dart';
+import '../models/employee.dart';
 import 'student_details_income.dart';
 import '../custom_date_range_picker.dart';
 
@@ -115,6 +116,7 @@ class _StudentDetailsScreenState extends State<StudentDetailsScreen> {
                 _student.motherPhone,
                 'Student\'s Phone',
                 _student.studentPhone),
+            _buildClassTeacherDropdown(),
             GestureDetector(
               onTap: () {
                 Navigator.push(
@@ -239,6 +241,33 @@ class _StudentDetailsScreenState extends State<StudentDetailsScreen> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildClassTeacherDropdown() {
+    final employeeBox = Hive.box<Employee>('employees');
+    final facultyList = employeeBox.values
+        .where((employee) => employee.position == 'Faculty')
+        .toList();
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: DropdownButtonFormField<String>(
+        value: _student.classTeacher,
+        decoration: const InputDecoration(labelText: 'Class Teacher'),
+        items: facultyList.map((employee) {
+          return DropdownMenuItem<String>(
+            value: employee.empNumber,
+            child: Text(employee.name),
+          );
+        }).toList(),
+        onChanged: (value) {
+          setState(() {
+            _student.classTeacher = value;
+          });
+          _student.save();
+        },
       ),
     );
   }

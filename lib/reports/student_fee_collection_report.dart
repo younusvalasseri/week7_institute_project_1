@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:excel/excel.dart';
-import 'package:path_provider/path_provider.dart';
+import 'package:external_path/external_path.dart';
+import 'package:file_picker/file_picker.dart'; // Add this import
 import 'dart:io';
 import '../models/account_transaction.dart';
 import '../models/student.dart';
@@ -12,7 +13,6 @@ class StudentFeeCollectionReport extends StatefulWidget {
   const StudentFeeCollectionReport({super.key});
 
   @override
-  // ignore: library_private_types_in_public_api
   _StudentFeeCollectionReportState createState() =>
       _StudentFeeCollectionReportState();
 }
@@ -204,14 +204,40 @@ class _StudentFeeCollectionReportState
       sheetObject.appendRow(row);
     });
 
-    final String directory = (await getApplicationDocumentsDirectory()).path;
-    final String filePath = '$directory/Fee_Collection_Report.xlsx';
-    final File file = File(filePath);
-    await file.writeAsBytes(excel.encode()!);
+    if (Platform.isAndroid) {
+      final String directory =
+          await ExternalPath.getExternalStoragePublicDirectory(
+              ExternalPath.DIRECTORY_DOWNLOADS);
+      final String filePath = '$directory/Fee_Collection_Report.xlsx';
+      final File file = File(filePath);
+      await file.writeAsBytes(excel.encode()!);
 
-    if (!mounted) return;
-    ScaffoldMessenger.of(_scaffoldKey.currentContext!).showSnackBar(
-      SnackBar(content: Text('Report saved to $filePath')),
-    );
+      if (!mounted) return;
+      ScaffoldMessenger.of(_scaffoldKey.currentContext!).showSnackBar(
+        SnackBar(content: Text('Report saved to $filePath')),
+      );
+    } else if (Platform.isWindows) {
+      String? outputFile = await FilePicker.platform.saveFile(
+        dialogTitle: 'Save Excel File',
+        fileName: 'Fee_Collection_Report.xlsx',
+        type: FileType.custom,
+        allowedExtensions: ['xlsx'],
+      );
+
+      if (outputFile != null) {
+        final File file = File(outputFile);
+        await file.writeAsBytes(excel.encode()!);
+
+        if (!mounted) return;
+        ScaffoldMessenger.of(_scaffoldKey.currentContext!).showSnackBar(
+          SnackBar(content: Text('Report saved to $outputFile')),
+        );
+      } else {
+        if (!mounted) return;
+        ScaffoldMessenger.of(_scaffoldKey.currentContext!).showSnackBar(
+          const SnackBar(content: Text('Save cancelled')),
+        );
+      }
+    }
   }
 }
