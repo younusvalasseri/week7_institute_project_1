@@ -125,7 +125,7 @@ class _AddIncomeScreenState extends State<AddIncomeScreen> {
                       .toList()
                       .where((student) => !student.isDeleted)
                       .toList();
-
+                  // Added new
                   if (widget.currentUser.position == 'Faculty') {
                     students = students
                         .where((student) =>
@@ -144,7 +144,7 @@ class _AddIncomeScreenState extends State<AddIncomeScreen> {
                         value: student.admNumber,
                         child: Text(student.name),
                       );
-                    }).toList(),
+                    }),
                   ];
 
                   if (!items.any((item) => item.value == studentId)) {
@@ -180,7 +180,7 @@ class _AddIncomeScreenState extends State<AddIncomeScreen> {
                         value: employee.empNumber,
                         child: Text(employee.name),
                       );
-                    }).toList(),
+                    }),
                   ];
 
                   if (!items.any((item) => item.value == employeeId)) {

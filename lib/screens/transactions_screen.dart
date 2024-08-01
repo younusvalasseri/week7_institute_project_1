@@ -3,12 +3,14 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:week7_institute_project_1/custom_date_range_picker.dart';
 import 'package:week7_institute_project_1/generated/l10n.dart';
+import 'package:week7_institute_project_1/models/employee.dart';
 import '../models/account_transaction.dart';
 import 'add_transaction.dart';
 import '../crud_operations.dart';
 
 class TransactionsScreen extends StatefulWidget {
-  const TransactionsScreen({super.key});
+  final Employee currentUser;
+  const TransactionsScreen({super.key, required this.currentUser});
 
   @override
   State<TransactionsScreen> createState() => _TransactionsScreenState();
@@ -54,7 +56,10 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
       floatingActionButton: FloatingActionButton(
         onPressed: () => Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => const AddTransactionScreen()),
+          MaterialPageRoute(
+              builder: (context) => AddTransactionScreen(
+                    currentUser: widget.currentUser,
+                  )),
         ),
         tooltip: 'Add Transaction',
         child: const Icon(Icons.add),
@@ -202,6 +207,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
                                 builder: (context) => AddTransactionScreen(
                                   transaction: transaction,
                                   index: index,
+                                  currentUser: widget.currentUser,
                                 ),
                               ),
                             ),

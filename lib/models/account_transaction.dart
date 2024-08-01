@@ -26,7 +26,7 @@ class AccountTransaction extends HiveObject {
   late double amount;
 
   @HiveField(7)
-  String? note; // Renamed from description to note
+  String? note;
 
   @HiveField(8)
   String? studentId;

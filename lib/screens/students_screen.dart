@@ -2,13 +2,16 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:week7_institute_project_1/generated/l10n.dart';
+import 'package:week7_institute_project_1/models/employee.dart';
 import 'package:week7_institute_project_1/screens/add_students_screen.dart';
 import '../models/student.dart';
 import '../models/account_transaction.dart';
 import 'student_details_screen.dart';
 
 class StudentsScreen extends StatefulWidget {
-  const StudentsScreen({super.key});
+  final Employee currentUser; // Add this line to get the current user
+
+  const StudentsScreen({super.key, required this.currentUser});
 
   @override
   State<StudentsScreen> createState() => _StudentsScreenState();
@@ -53,8 +56,14 @@ class _StudentsScreenState extends State<StudentsScreen> {
             child: ValueListenableBuilder(
               valueListenable: _studentsBox.listenable(),
               builder: (context, Box<Student> box, _) {
-                var students =
-                    box.values.where((student) => !student.isDeleted).toList();
+                List<Student> students;
+                if (widget.currentUser.username == 'admin') {
+                  students = box.values.toList();
+                } else {
+                  students = box.values
+                      .where((student) => !student.isDeleted)
+                      .toList();
+                }
 
                 if (_searchQuery.isNotEmpty) {
                   students = students
@@ -115,6 +124,11 @@ class _StudentsScreenState extends State<StudentsScreen> {
                                         style: const TextStyle(
                                             fontWeight: FontWeight.bold)),
                                     Text(student.admNumber),
+                                    if (student.isDeleted)
+                                      const Text(
+                                        'Deleted',
+                                        style: TextStyle(color: Colors.red),
+                                      ),
                                   ],
                                 ),
                               ),

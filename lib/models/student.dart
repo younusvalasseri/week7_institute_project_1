@@ -35,7 +35,7 @@ class Student extends HiveObject {
   double? courseFee = 0;
 
   @HiveField(10)
-  bool isDeleted = false;
+  bool isDeleted = false; // Added field
 
   @HiveField(11)
   String? classTeacher; // Added field

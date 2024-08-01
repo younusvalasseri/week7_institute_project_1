@@ -4,7 +4,6 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:week7_institute_project_1/generated/l10n.dart';
 import 'package:week7_institute_project_1/screens/add_employee_screen.dart';
 import '../models/employee.dart';
-// import '../crud_operations.dart';
 import 'employee_details_screen.dart';
 
 class EmployeesScreen extends StatefulWidget {
@@ -98,7 +97,20 @@ class _EmployeesScreenState extends State<EmployeesScreen> {
                     : null,
               ),
               title: Text(employee.name),
-              subtitle: Text('Position: ${employee.position}'),
+              subtitle: employee.isActive
+                  ? Text('Position: ${employee.position}')
+                  : RichText(
+                      text: TextSpan(
+                        text: 'Position: ${employee.position} ',
+                        style: DefaultTextStyle.of(context).style,
+                        children: const <TextSpan>[
+                          TextSpan(
+                            text: '(Deleted)',
+                            style: TextStyle(color: Colors.red),
+                          ),
+                        ],
+                      ),
+                    ),
               trailing: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [

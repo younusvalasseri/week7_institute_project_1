@@ -71,8 +71,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     'We may update our privacy policy from time to time. We will notify you of any changes by posting the new '
                     'privacy policy on this page.\n\n'
                     'Contact Us\n'
-                    'If you have any questions or concerns about this privacy policy, please contact us at privacy@example.com.\n\n'
-                    'This privacy policy is effective as of [Date].'),
+                    'If you have any questions or concerns about this privacy policy, please contact us at younusv@gmail.com.\n\n'
+                    'This privacy policy is effective as of 01/08/2024.'),
               ],
             ),
           ),

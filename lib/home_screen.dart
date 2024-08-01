@@ -146,11 +146,16 @@ class _HomeScreenState extends State<HomeScreen> {
                 color: Colors.amber),
             const SizedBox(height: 15),
             _buildCard(context, S.of(context).Students, Icons.school,
-                const StudentsScreen(),
+                StudentsScreen(currentUser: widget.currentUser),
                 color: Colors.blue),
             const SizedBox(height: 15),
-            _buildCard(context, S.of(context).Transaction, Icons.receipt_long,
-                const TransactionsScreen(),
+            _buildCard(
+                context,
+                S.of(context).Transaction,
+                Icons.receipt_long,
+                TransactionsScreen(
+                  currentUser: widget.currentUser,
+                ),
                 color: Colors.amber),
             const SizedBox(height: 15),
             if (widget.currentUser.username == 'admin') // Show only for admin

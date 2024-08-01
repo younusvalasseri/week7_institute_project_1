@@ -22,6 +22,7 @@ class _AddEmployeeScreenState extends State<AddEmployeeScreen> {
   void initState() {
     super.initState();
     empNumber = widget.employee?.empNumber ?? '';
+
     name = widget.employee?.name ?? '';
     position = widget.employee?.position ?? '';
     phone = widget.employee?.phone ?? '';

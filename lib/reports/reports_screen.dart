@@ -1,16 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:week7_institute_project_1/generated/l10n.dart';
+import 'package:week7_institute_project_1/models/employee.dart';
 import 'students_collection_vs_pending_report.dart'; // Placeholder page
 import 'income_vs_expense_report.dart'; // Placeholder page
 import 'student_fee_collection_report.dart'; // New page
+import 'students_per_course.dart'; // New page
+import 'transactions_per_category.dart'; // New page
 
 class ReportsScreen extends StatelessWidget {
-  const ReportsScreen({super.key});
+  final Employee currentUser;
+  const ReportsScreen({super.key, required this.currentUser});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Reports'),
+        title: Text(S.of(context).reports),
       ),
       body: Column(
         children: [
@@ -31,6 +36,18 @@ class ReportsScreen extends StatelessWidget {
             'Fee Collection Report',
             Icons.school,
             const StudentFeeCollectionReport(),
+          ),
+          _buildCard(
+            context,
+            'Students per Course',
+            Icons.people,
+            StudentsPerCourse(currentUser: currentUser),
+          ),
+          _buildCard(
+            context,
+            'Transactions per Category',
+            Icons.category,
+            const TransactionsPerCategory(),
           ),
         ],
       ),

@@ -9,8 +9,10 @@ import '../crud_operations.dart';
 class AddTransactionScreen extends StatefulWidget {
   final AccountTransaction? transaction;
   final int? index;
+  final Employee currentUser;
 
-  const AddTransactionScreen({super.key, this.transaction, this.index});
+  const AddTransactionScreen(
+      {super.key, this.transaction, this.index, required this.currentUser});
 
   @override
   // ignore: library_private_types_in_public_api
@@ -172,9 +174,16 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                 valueListenable: Hive.box<Student>('students').listenable(),
                 builder: (context, Box<Student> box, _) {
                   var students = box.values
-                      .toList()
                       .where((student) => !student.isDeleted)
                       .toList();
+
+                  if (widget.currentUser.position == 'Faculty') {
+                    students = students
+                        .where((student) =>
+                            student.classTeacher ==
+                            widget.currentUser.empNumber)
+                        .toList();
+                  }
                   if (!students.any((s) => s.admNumber == studentId)) {
                     studentId = 'Select Item';
                   }

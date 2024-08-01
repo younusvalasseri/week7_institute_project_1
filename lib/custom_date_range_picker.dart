@@ -76,7 +76,7 @@ class _CustomDateRangePickerState extends State<CustomDateRangePicker> {
                 hintText: 'dd/MMM/yyyy (e.g., 15/Jun/2023)',
               ),
               inputFormatters: [DateTextInputFormatter()],
-              keyboardType: TextInputType.datetime,
+              keyboardType: TextInputType.text,
               onChanged: _updateStartDate,
             ),
             const SizedBox(height: 8),

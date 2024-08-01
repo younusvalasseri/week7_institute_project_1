@@ -55,7 +55,7 @@ class S {
     return Intl.message(
       'Institute Management App',
       name: 'appTitle',
-      desc: '',
+      desc: 'Institute Management App',
       args: [],
     );
   }
@@ -65,7 +65,7 @@ class S {
     return Intl.message(
       'Home',
       name: 'home',
-      desc: '',
+      desc: 'Home',
       args: [],
     );
   }
@@ -75,7 +75,7 @@ class S {
     return Intl.message(
       'Reports',
       name: 'reports',
-      desc: '',
+      desc: 'Reports',
       args: [],
     );
   }
@@ -85,7 +85,7 @@ class S {
     return Intl.message(
       'Settings',
       name: 'settings',
-      desc: '',
+      desc: 'Settings',
       args: [],
     );
   }
@@ -95,7 +95,7 @@ class S {
     return Intl.message(
       'Add',
       name: 'add',
-      desc: '',
+      desc: 'Add',
       args: [],
     );
   }
@@ -105,7 +105,7 @@ class S {
     return Intl.message(
       'Language',
       name: 'language',
-      desc: '',
+      desc: 'Language',
       args: [],
     );
   }
@@ -115,7 +115,7 @@ class S {
     return Intl.message(
       'Dark Theme',
       name: 'darkTheme',
-      desc: '',
+      desc: 'Dark Theme',
       args: [],
     );
   }
@@ -125,7 +125,7 @@ class S {
     return Intl.message(
       'Privacy Policy',
       name: 'privacyPolicy',
-      desc: '',
+      desc: 'Privacy Policy',
       args: [],
     );
   }
@@ -135,7 +135,7 @@ class S {
     return Intl.message(
       'Admin Panel',
       name: 'adminPanel',
-      desc: '',
+      desc: 'Admin Panel',
       args: [],
     );
   }
@@ -145,7 +145,7 @@ class S {
     return Intl.message(
       'Password Reset',
       name: 'passwordReset',
-      desc: '',
+      desc: 'Password Reset',
       args: [],
     );
   }
@@ -155,7 +155,7 @@ class S {
     return Intl.message(
       'Categories',
       name: 'categories',
-      desc: '',
+      desc: 'Categories',
       args: [],
     );
   }
@@ -165,7 +165,7 @@ class S {
     return Intl.message(
       'Courses',
       name: 'courses',
-      desc: '',
+      desc: 'Courses',
       args: [],
     );
   }
@@ -175,7 +175,7 @@ class S {
     return Intl.message(
       'Income',
       name: 'Income',
-      desc: '',
+      desc: 'Income',
       args: [],
     );
   }
@@ -185,7 +185,7 @@ class S {
     return Intl.message(
       'Expenses',
       name: 'Expenses',
-      desc: '',
+      desc: 'Expenses',
       args: [],
     );
   }
@@ -195,7 +195,7 @@ class S {
     return Intl.message(
       'Employees',
       name: 'Employees',
-      desc: '',
+      desc: 'Employees',
       args: [],
     );
   }
@@ -205,7 +205,7 @@ class S {
     return Intl.message(
       'Students',
       name: 'Students',
-      desc: '',
+      desc: 'Students',
       args: [],
     );
   }
@@ -215,7 +215,7 @@ class S {
     return Intl.message(
       'Transaction',
       name: 'Transaction',
-      desc: '',
+      desc: 'Transaction',
       args: [],
     );
   }
@@ -225,7 +225,7 @@ class S {
     return Intl.message(
       'Categories',
       name: 'Categories',
-      desc: '',
+      desc: 'Categories',
       args: [],
     );
   }
@@ -235,7 +235,7 @@ class S {
     return Intl.message(
       'Add Employee',
       name: 'AddEmployee',
-      desc: '',
+      desc: 'Add Employee',
       args: [],
     );
   }
@@ -245,7 +245,7 @@ class S {
     return Intl.message(
       'Edit Employee',
       name: 'EditEmployee',
-      desc: '',
+      desc: 'Edit Employee',
       args: [],
     );
   }

@@ -3,6 +3,7 @@ import 'package:hive/hive.dart';
 import 'package:week7_institute_project_1/models/account_transaction.dart';
 import 'package:week7_institute_project_1/models/employee.dart';
 
+//this is a new screen in this week
 class EmployeeSalaryDetails extends StatelessWidget {
   final Employee employee;
 

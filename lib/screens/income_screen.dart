@@ -154,6 +154,7 @@ class _IncomeScreenState extends State<IncomeScreen> {
               !transaction.entryDate.isAfter(_selectedDateRange!.end);
         }).toList();
 
+        // Added new
         if (widget.currentUser.position == 'Faculty') {
           var students = Hive.box<Student>('students')
               .values

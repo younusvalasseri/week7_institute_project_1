@@ -212,6 +212,7 @@ class _AddExpensesScreenState extends State<AddExpensesScreen> {
     List<Student> students = CRUDOperations.readAllStudents()
         .where((student) => !student.isDeleted)
         .toList();
+    // Added new
     if (widget.currentUser.position == 'Faculty') {
       students = students
           .where(

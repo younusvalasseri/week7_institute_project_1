@@ -13,6 +13,7 @@ class StudentFeeCollectionReport extends StatefulWidget {
   const StudentFeeCollectionReport({super.key});
 
   @override
+  // ignore: library_private_types_in_public_api
   _StudentFeeCollectionReportState createState() =>
       _StudentFeeCollectionReportState();
 }
@@ -61,7 +62,7 @@ class _StudentFeeCollectionReportState
   Widget _buildDateFilter() {
     return Padding(
       padding: const EdgeInsets.all(8.0),
-      child: Column(
+      child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           ElevatedButton(
@@ -84,9 +85,9 @@ class _StudentFeeCollectionReportState
             child: const Text('Select Date Range'),
           ),
           if (_selectedDateRange != null)
-            Wrap(
-              spacing: 8.0,
-              crossAxisAlignment: WrapCrossAlignment.center,
+            Column(
+              // spacing: 8.0,
+              // crossAxisAlignment: WrapCrossAlignment.center,
               children: [
                 Text(
                   '${DateFormat('dd/MMM/yyyy').format(_selectedDateRange!.start)} - ${DateFormat('dd/MMM/yyyy').format(_selectedDateRange!.end)}',

@@ -35,10 +35,10 @@ class Employee extends HiveObject {
   String? username;
 
   @HiveField(10)
-  double? previousSalary;
+  double? previousSalary; // Added field
 
   @HiveField(11)
-  double? currentSalary;
+  double? currentSalary; // Added field
 
   Employee() {
     empNumber = '';

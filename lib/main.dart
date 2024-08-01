@@ -95,13 +95,13 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Institute Management App',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-        brightness: Brightness.light,
-      ),
+      // theme: ThemeData(
+      //     // primarySwatch: Colors.blue,
+      //     // brightness: Brightness.light,
+      //     ),
       darkTheme: ThemeData(
         brightness: Brightness.dark,
-        primarySwatch: Colors.blue,
+        // primarySwatch: Colors.blue,
       ),
       themeMode: _themeMode,
       locale: _locale,
@@ -163,7 +163,7 @@ class _MainScreenState extends State<MainScreen> {
   Widget build(BuildContext context) {
     final List<Widget> widgetOptions = <Widget>[
       HomeScreen(currentUser: widget.currentUser),
-      const ReportsScreen(),
+      ReportsScreen(currentUser: widget.currentUser),
       SettingsScreen(
         onThemeChanged: widget.onThemeChanged,
         onLanguageChanged: widget.onLanguageChanged,
@@ -215,22 +215,6 @@ class _MainScreenState extends State<MainScreen> {
         ],
         currentIndex: _selectedIndex,
         onTap: onItemTapped,
-      ),
-    );
-  }
-}
-
-class StudentCollectionPendingReportScreen extends StatelessWidget {
-  const StudentCollectionPendingReportScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(S.of(context).reports),
-      ),
-      body: Center(
-        child: Text(S.of(context).reports),
       ),
     );
   }

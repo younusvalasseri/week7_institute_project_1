@@ -11,6 +11,7 @@ class AddStudentScreen extends StatefulWidget {
   const AddStudentScreen({super.key, this.student, this.index});
 
   @override
+  // ignore: library_private_types_in_public_api
   _AddStudentScreenState createState() => _AddStudentScreenState();
 }
 
@@ -141,7 +142,7 @@ class _AddStudentScreenState extends State<AddStudentScreen> {
                           value: employee.empNumber,
                           child: Text(employee.name),
                         );
-                      }).toList(),
+                      }),
                     ];
 
                     if (!items.any((item) => item.value == classTeacher)) {

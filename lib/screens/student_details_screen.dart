@@ -57,6 +57,13 @@ class _StudentDetailsScreenState extends State<StudentDetailsScreen> {
     }
   }
 
+  Future<void> _deleteProfilePicture() async {
+    setState(() {
+      _student.profilePicture = null;
+    });
+    await _student.save();
+  }
+
   Future<void> _makePhoneCall(String phoneNumber) async {
     final Uri launchUri = Uri(
       scheme: 'tel',
@@ -87,18 +94,32 @@ class _StudentDetailsScreenState extends State<StudentDetailsScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            GestureDetector(
-              onTap: _pickImage,
-              child: CircleAvatar(
-                radius: 60,
-                backgroundImage: _student.profilePicture != null
-                    ? FileImage(File(_student.profilePicture!))
-                    : null,
-                child: _student.profilePicture == null
-                    ? const Icon(Icons.add_a_photo, size: 40)
-                    : null,
-              ),
+            Stack(
+              children: [
+                GestureDetector(
+                  onTap: _pickImage,
+                  child: CircleAvatar(
+                    radius: 60,
+                    backgroundImage: _student.profilePicture != null
+                        ? FileImage(File(_student.profilePicture!))
+                        : null,
+                    child: _student.profilePicture == null
+                        ? const Icon(Icons.add_a_photo, size: 40)
+                        : null,
+                  ),
+                ),
+                if (_student.profilePicture != null)
+                  Positioned(
+                    right: -10,
+                    top: -10,
+                    child: IconButton(
+                      icon: const Icon(Icons.delete, color: Colors.red),
+                      onPressed: _deleteProfilePicture,
+                    ),
+                  ),
+              ],
             ),
+
             const SizedBox(height: 16),
             Text(
               _student.name,
@@ -116,7 +137,7 @@ class _StudentDetailsScreenState extends State<StudentDetailsScreen> {
                 _student.motherPhone,
                 'Student\'s Phone',
                 _student.studentPhone),
-            _buildClassTeacherDropdown(),
+            _buildClassTeacherDropdown(), // Added new
             GestureDetector(
               onTap: () {
                 Navigator.push(
@@ -245,6 +266,7 @@ class _StudentDetailsScreenState extends State<StudentDetailsScreen> {
     );
   }
 
+  // Added new
   Widget _buildClassTeacherDropdown() {
     final employeeBox = Hive.box<Employee>('employees');
     final facultyList = employeeBox.values

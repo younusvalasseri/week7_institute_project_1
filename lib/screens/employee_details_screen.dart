@@ -17,6 +17,7 @@ class EmployeeDetailsScreen extends StatefulWidget {
   });
 
   @override
+  // ignore: library_private_types_in_public_api
   _EmployeeDetailsScreenState createState() => _EmployeeDetailsScreenState();
 }
 
@@ -80,6 +81,7 @@ class _EmployeeDetailsScreenState extends State<EmployeeDetailsScreen> {
     super.dispose();
   }
 
+// Added new
   Future<void> _makePhoneCall(String phoneNumber) async {
     final Uri launchUri = Uri(
       scheme: 'tel',
@@ -210,7 +212,7 @@ class _EmployeeDetailsScreenState extends State<EmployeeDetailsScreen> {
           ),
           Expanded(
             child: GestureDetector(
-              onTap: () => _makePhoneCall(phone),
+              onTap: () => _makePhoneCall(phone), // Added new
               child: Text(
                 phone,
                 style: const TextStyle(
