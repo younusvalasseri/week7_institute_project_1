@@ -6,8 +6,7 @@ class UsersPanel extends StatefulWidget {
   const UsersPanel({super.key});
 
   @override
-  // ignore: library_private_types_in_public_api
-  _UsersPanelState createState() => _UsersPanelState();
+  State<UsersPanel> createState() => _UsersPanelState();
 }
 
 class _UsersPanelState extends State<UsersPanel> {

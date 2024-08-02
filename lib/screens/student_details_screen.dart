@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:image_cropper/image_cropper.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
@@ -21,8 +22,7 @@ class StudentDetailsScreen extends StatefulWidget {
   const StudentDetailsScreen({super.key, required this.student});
 
   @override
-  // ignore: library_private_types_in_public_api
-  _StudentDetailsScreenState createState() => _StudentDetailsScreenState();
+  State<StudentDetailsScreen> createState() => _StudentDetailsScreenState();
 }
 
 class _StudentDetailsScreenState extends State<StudentDetailsScreen> {
@@ -46,15 +46,77 @@ class _StudentDetailsScreenState extends State<StudentDetailsScreen> {
   }
 
   Future<void> _pickImage() async {
-    final ImagePicker picker = ImagePicker();
-    final XFile? image = await picker.pickImage(source: ImageSource.gallery);
+    try {
+      final ImagePicker picker = ImagePicker();
+      final XFile? pickedImage =
+          await picker.pickImage(source: ImageSource.gallery);
 
-    if (image != null) {
-      setState(() {
-        _student.profilePicture = image.path;
-      });
-      await _student.save();
+      if (pickedImage == null) {
+        // User canceled the picker
+        return;
+      }
+
+      final croppedFile = await ImageCropper().cropImage(
+        sourcePath: pickedImage.path,
+        aspectRatio:
+            const CropAspectRatio(ratioX: 1, ratioY: 1), // Square aspect ratio
+        compressFormat: ImageCompressFormat.jpg,
+        compressQuality: 100,
+        uiSettings: [
+          AndroidUiSettings(
+            toolbarTitle: 'Crop Image',
+            toolbarColor: Colors.deepOrange,
+            toolbarWidgetColor: Colors.white,
+            initAspectRatio: CropAspectRatioPreset.square,
+            lockAspectRatio: true,
+          ),
+          IOSUiSettings(
+            title: 'Crop Image',
+            aspectRatioLockEnabled: true,
+            resetAspectRatioEnabled: false,
+          ),
+        ],
+      );
+
+      if (croppedFile != null) {
+        // Preview the image
+        final result = await _showImagePreviewDialog(croppedFile.path);
+
+        if (result == true) {
+          setState(() {
+            _student.profilePicture = croppedFile.path;
+          });
+          await _student.save();
+        }
+      }
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error picking or cropping image: $e')),
+      );
     }
+  }
+
+  Future<bool?> _showImagePreviewDialog(String imagePath) {
+    return showDialog<bool>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Preview'),
+          content: Image.file(File(imagePath)),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Cancel'),
+              onPressed: () => Navigator.of(context).pop(false),
+            ),
+            TextButton(
+              child: const Text('Save'),
+              onPressed: () => Navigator.of(context).pop(true),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   Future<void> _deleteProfilePicture() async {
@@ -95,6 +157,7 @@ class _StudentDetailsScreenState extends State<StudentDetailsScreen> {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Stack(
+              alignment: Alignment.center,
               children: [
                 GestureDetector(
                   onTap: _pickImage,
@@ -119,7 +182,6 @@ class _StudentDetailsScreenState extends State<StudentDetailsScreen> {
                   ),
               ],
             ),
-
             const SizedBox(height: 16),
             Text(
               _student.name,
@@ -137,7 +199,7 @@ class _StudentDetailsScreenState extends State<StudentDetailsScreen> {
                 _student.motherPhone,
                 'Student\'s Phone',
                 _student.studentPhone),
-            _buildClassTeacherDropdown(), // Added new
+            _buildClassTeacherDropdown(),
             GestureDetector(
               onTap: () {
                 Navigator.push(
@@ -266,7 +328,6 @@ class _StudentDetailsScreenState extends State<StudentDetailsScreen> {
     );
   }
 
-  // Added new
   Widget _buildClassTeacherDropdown() {
     final employeeBox = Hive.box<Employee>('employees');
     final facultyList = employeeBox.values
@@ -392,70 +453,81 @@ class _StudentDetailsScreenState extends State<StudentDetailsScreen> {
     final Uint8List byteListNtem = bytesNtem.buffer.asUint8List();
     final imageNtem = pw.MemoryImage(byteListNtem);
 
+    final ByteData bytesSignature =
+        await rootBundle.load('assets/younus_sign.png');
+    final Uint8List byteListSignature = bytesSignature.buffer.asUint8List();
+    final imageSignature = pw.MemoryImage(byteListSignature);
+
     pdf.addPage(
       pw.Page(
         pageFormat: PdfPageFormat.a4.landscape,
         build: (pw.Context context) {
           return pw.Container(
-            padding: const pw.EdgeInsets.all(32),
+            padding: const pw.EdgeInsets.all(16),
             child: pw.Column(
               crossAxisAlignment: pw.CrossAxisAlignment.start,
               children: [
                 pw.Row(
                   mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                   children: [
-                    pw.Image(image, width: 100),
+                    pw.Image(image, width: 80),
                     pw.Text(
                       'Certificate',
                       style: pw.TextStyle(
-                        fontSize: 40,
+                        fontSize: 35,
                         fontWeight: pw.FontWeight.bold,
                       ),
                     ),
-                    pw.Image(imageNtem, width: 100),
+                    pw.Image(imageNtem, width: 80),
                   ],
                 ),
-                pw.SizedBox(height: 40),
+                pw.SizedBox(height: 30),
                 pw.Center(
                   child: pw.Text(
                     'Mr. ${_student.name}',
-                    style: const pw.TextStyle(fontSize: 30),
+                    style: const pw.TextStyle(fontSize: 28),
                   ),
                 ),
-                pw.SizedBox(height: 20),
+                pw.SizedBox(height: 15),
                 pw.Center(
                   child: pw.Text(
                     'has successfully completed the training on',
-                    style: const pw.TextStyle(fontSize: 20),
+                    style: const pw.TextStyle(fontSize: 18),
                   ),
                 ),
-                pw.SizedBox(height: 20),
+                pw.SizedBox(height: 15),
                 pw.Center(
                   child: pw.Text(
                     '$course from $startDate to $endDate',
-                    style: const pw.TextStyle(fontSize: 20),
+                    style: const pw.TextStyle(fontSize: 18),
                   ),
                 ),
-                pw.SizedBox(height: 20),
+                pw.SizedBox(height: 15),
                 pw.Center(
                   child: pw.Text(
                     'During this period he has gone through the following competencies successfully:',
-                    style: const pw.TextStyle(fontSize: 15),
+                    style: const pw.TextStyle(fontSize: 14),
                   ),
                 ),
-                pw.SizedBox(height: 20),
+                pw.SizedBox(height: 15),
                 pw.Center(
                   child: pw.Text(
                     competencies,
-                    style: const pw.TextStyle(fontSize: 20),
+                    style: const pw.TextStyle(fontSize: 18),
                   ),
                 ),
-                pw.SizedBox(height: 30),
+                pw.SizedBox(height: 25),
                 pw.Align(
                   alignment: pw.Alignment.bottomRight,
-                  child: pw.Text(
-                    'Head of the Department',
-                    style: const pw.TextStyle(fontSize: 20),
+                  child: pw.Column(
+                    children: [
+                      pw.Image(imageSignature, width: 100),
+                      pw.SizedBox(height: 5),
+                      pw.Text(
+                        'Head of the Department',
+                        style: const pw.TextStyle(fontSize: 18),
+                      ),
+                    ],
                   ),
                 ),
               ],

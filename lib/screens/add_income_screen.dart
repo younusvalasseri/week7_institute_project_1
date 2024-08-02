@@ -16,8 +16,7 @@ class AddIncomeScreen extends StatefulWidget {
       {super.key, this.transaction, this.index, required this.currentUser});
 
   @override
-  // ignore: library_private_types_in_public_api
-  _AddIncomeScreenState createState() => _AddIncomeScreenState();
+  State<AddIncomeScreen> createState() => _AddIncomeScreenState();
 }
 
 class _AddIncomeScreenState extends State<AddIncomeScreen> {

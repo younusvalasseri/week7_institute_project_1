@@ -13,8 +13,7 @@ class AddExpensesScreen extends StatefulWidget {
       {super.key, this.transaction, this.index, required this.currentUser});
 
   @override
-  // ignore: library_private_types_in_public_api
-  _AddExpensesScreenState createState() => _AddExpensesScreenState();
+  State<AddExpensesScreen> createState() => _AddExpensesScreenState();
 }
 
 class _AddExpensesScreenState extends State<AddExpensesScreen> {

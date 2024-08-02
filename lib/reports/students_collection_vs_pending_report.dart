@@ -9,8 +9,7 @@ class StudentsCollectionVsPendingReport extends StatefulWidget {
   const StudentsCollectionVsPendingReport({super.key});
 
   @override
-  // ignore: library_private_types_in_public_api
-  _StudentsCollectionVsPendingReportState createState() =>
+  State<StudentsCollectionVsPendingReport> createState() =>
       _StudentsCollectionVsPendingReportState();
 }
 

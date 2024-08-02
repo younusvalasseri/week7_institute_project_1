@@ -9,8 +9,7 @@ class IncomeVsExpenseReport extends StatefulWidget {
   const IncomeVsExpenseReport({super.key});
 
   @override
-  // ignore: library_private_types_in_public_api
-  _IncomeVsExpenseReportState createState() => _IncomeVsExpenseReportState();
+  State<IncomeVsExpenseReport> createState() => _IncomeVsExpenseReportState();
 }
 
 class _IncomeVsExpenseReportState extends State<IncomeVsExpenseReport> {

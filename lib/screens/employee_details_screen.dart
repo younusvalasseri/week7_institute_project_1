@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../models/employee.dart';
 import 'employee_salary_details.dart';
+import 'package:image_cropper/image_cropper.dart';
 
 class EmployeeDetailsScreen extends StatefulWidget {
   final Employee employee;
@@ -17,8 +18,7 @@ class EmployeeDetailsScreen extends StatefulWidget {
   });
 
   @override
-  // ignore: library_private_types_in_public_api
-  _EmployeeDetailsScreenState createState() => _EmployeeDetailsScreenState();
+  State<EmployeeDetailsScreen> createState() => _EmployeeDetailsScreenState();
 }
 
 class _EmployeeDetailsScreenState extends State<EmployeeDetailsScreen> {
@@ -40,15 +40,77 @@ class _EmployeeDetailsScreenState extends State<EmployeeDetailsScreen> {
   }
 
   Future<void> _pickImage() async {
-    final ImagePicker picker = ImagePicker();
-    final XFile? image = await picker.pickImage(source: ImageSource.gallery);
+    try {
+      final ImagePicker picker = ImagePicker();
+      final XFile? pickedImage =
+          await picker.pickImage(source: ImageSource.gallery);
 
-    if (image != null) {
-      setState(() {
-        _employee.profilePicture = image.path;
-      });
-      await _employee.save();
+      if (pickedImage == null) {
+        // User canceled the picker
+        return;
+      }
+
+      final croppedFile = await ImageCropper().cropImage(
+        sourcePath: pickedImage.path,
+        aspectRatio:
+            const CropAspectRatio(ratioX: 1, ratioY: 1), // Square aspect ratio
+        compressFormat: ImageCompressFormat.jpg,
+        compressQuality: 100,
+        uiSettings: [
+          AndroidUiSettings(
+            toolbarTitle: 'Crop Image',
+            toolbarColor: Colors.deepOrange,
+            toolbarWidgetColor: Colors.white,
+            initAspectRatio: CropAspectRatioPreset.square,
+            lockAspectRatio: true,
+          ),
+          IOSUiSettings(
+            title: 'Crop Image',
+            aspectRatioLockEnabled: true,
+            resetAspectRatioEnabled: false,
+          ),
+        ],
+      );
+
+      if (croppedFile != null) {
+        // Preview the image
+        final result = await _showImagePreviewDialog(croppedFile.path);
+
+        if (result == true) {
+          setState(() {
+            _employee.profilePicture = croppedFile.path;
+          });
+          await _employee.save();
+        }
+      }
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error picking or cropping image: $e')),
+      );
     }
+  }
+
+  Future<bool?> _showImagePreviewDialog(String imagePath) {
+    return showDialog<bool>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Preview'),
+          content: Image.file(File(imagePath)),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Cancel'),
+              onPressed: () => Navigator.of(context).pop(false),
+            ),
+            TextButton(
+              child: const Text('Save'),
+              onPressed: () => Navigator.of(context).pop(true),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   Future<void> _deleteProfilePicture() async {

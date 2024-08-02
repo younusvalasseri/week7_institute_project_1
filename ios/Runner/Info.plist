@@ -60,7 +60,7 @@
 		<true/>
 	</dict>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>Photo access is required to send email attachments.</string>
+	<string>This app requires access to the photo library for profile picture selection.</string>
 	<key>NSCameraUsageDescription</key>
 	<string>Camera access is required to take photos for email attachments.</string>
 	<key>NSMicrophoneUsageDescription</key>

@@ -11,8 +11,7 @@ class AddStudentScreen extends StatefulWidget {
   const AddStudentScreen({super.key, this.student, this.index});
 
   @override
-  // ignore: library_private_types_in_public_api
-  _AddStudentScreenState createState() => _AddStudentScreenState();
+  State<AddStudentScreen> createState() => _AddStudentScreenState();
 }
 
 class _AddStudentScreenState extends State<AddStudentScreen> {

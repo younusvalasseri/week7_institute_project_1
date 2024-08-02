@@ -9,8 +9,7 @@ class AddEmployeeScreen extends StatefulWidget {
   const AddEmployeeScreen({super.key, this.employee, this.index});
 
   @override
-  // ignore: library_private_types_in_public_api
-  _AddEmployeeScreenState createState() => _AddEmployeeScreenState();
+  State<AddEmployeeScreen> createState() => _AddEmployeeScreenState();
 }
 
 class _AddEmployeeScreenState extends State<AddEmployeeScreen> {

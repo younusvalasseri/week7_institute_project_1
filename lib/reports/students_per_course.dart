@@ -11,8 +11,7 @@ class StudentsPerCourse extends StatefulWidget {
   const StudentsPerCourse({super.key, required this.currentUser});
 
   @override
-  // ignore: library_private_types_in_public_api
-  _StudentsPerCourseState createState() => _StudentsPerCourseState();
+  State<StudentsPerCourse> createState() => _StudentsPerCourseState();
 }
 
 class _StudentsPerCourseState extends State<StudentsPerCourse> {

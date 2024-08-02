@@ -15,8 +15,7 @@ class AddTransactionScreen extends StatefulWidget {
       {super.key, this.transaction, this.index, required this.currentUser});
 
   @override
-  // ignore: library_private_types_in_public_api
-  _AddTransactionScreenState createState() => _AddTransactionScreenState();
+  State<AddTransactionScreen> createState() => _AddTransactionScreenState();
 }
 
 class _AddTransactionScreenState extends State<AddTransactionScreen> {

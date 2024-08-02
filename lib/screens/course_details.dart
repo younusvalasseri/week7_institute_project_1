@@ -6,8 +6,7 @@ class CourseDetailsScreen extends StatefulWidget {
   const CourseDetailsScreen({super.key});
 
   @override
-  // ignore: library_private_types_in_public_api
-  _CourseDetailsScreenState createState() => _CourseDetailsScreenState();
+  State<CourseDetailsScreen> createState() => _CourseDetailsScreenState();
 }
 
 class _CourseDetailsScreenState extends State<CourseDetailsScreen> {
