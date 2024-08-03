@@ -35,10 +35,10 @@ class Employee extends HiveObject {
   String? username;
 
   @HiveField(10)
-  double? previousSalary; // Added field
+  double? previousSalary;
 
   @HiveField(11)
-  double? currentSalary; // Added field
+  double? currentSalary;
 
   Employee() {
     empNumber = '';
@@ -48,7 +48,7 @@ class Employee extends HiveObject {
     address = '';
     password = null;
     role = 'General';
-    isActive = true; // Ensure isActive is set to true by default
+    isActive = true;
     username = null;
     profilePicture = null;
     previousSalary = 0.0;

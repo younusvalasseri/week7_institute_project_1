@@ -23,6 +23,14 @@ class _EmployeesScreenState extends State<EmployeesScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(S.of(context).Employees),
+        actions: widget.currentUser.username == 'admin'
+            ? [
+                IconButton(
+                  icon: const Icon(Icons.delete_forever),
+                  onPressed: _clearHiveData,
+                ),
+              ]
+            : null,
       ),
       body: Column(
         children: [
@@ -173,5 +181,45 @@ class _EmployeesScreenState extends State<EmployeesScreen> {
         );
       },
     );
+  }
+
+  void _clearHiveData() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Confirm Clear All Data'),
+          content: const Text('Are you sure you want to clear all Hive data?'),
+          actions: [
+            TextButton(
+              child: const Text('Cancel'),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+            TextButton(
+              child: const Text('Clear Data'),
+              onPressed: () async {
+                Navigator.of(context).pop(); // Close the dialog first
+                await _clearAllHiveData();
+                if (mounted) {
+                  _showSnackBar('All Hive data cleared');
+                }
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> _clearAllHiveData() async {
+    await Hive.box<Employee>('employees').clear();
+  }
+
+  void _showSnackBar(String message) {
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(message)),
+      );
+    }
   }
 }

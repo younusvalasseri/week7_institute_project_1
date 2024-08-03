@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'dart:typed_data';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:image_picker/image_picker.dart';
@@ -45,7 +46,7 @@ class _StudentDetailsScreenState extends State<StudentDetailsScreen> {
     return collectedFee;
   }
 
-  Future<void> _pickImage() async {
+  Future<String?> _pickAndProcessImage() async {
     try {
       final ImagePicker picker = ImagePicker();
       final XFile? pickedImage =
@@ -53,70 +54,49 @@ class _StudentDetailsScreenState extends State<StudentDetailsScreen> {
 
       if (pickedImage == null) {
         // User canceled the picker
-        return;
+        return null;
       }
 
-      final croppedFile = await ImageCropper().cropImage(
-        sourcePath: pickedImage.path,
-        aspectRatio:
-            const CropAspectRatio(ratioX: 1, ratioY: 1), // Square aspect ratio
-        compressFormat: ImageCompressFormat.jpg,
-        compressQuality: 100,
-        uiSettings: [
-          AndroidUiSettings(
-            toolbarTitle: 'Crop Image',
-            toolbarColor: Colors.deepOrange,
-            toolbarWidgetColor: Colors.white,
-            initAspectRatio: CropAspectRatioPreset.square,
-            lockAspectRatio: true,
-          ),
-          IOSUiSettings(
-            title: 'Crop Image',
-            aspectRatioLockEnabled: true,
-            resetAspectRatioEnabled: false,
-          ),
-        ],
-      );
-
-      if (croppedFile != null) {
-        // Preview the image
-        final result = await _showImagePreviewDialog(croppedFile.path);
-
-        if (result == true) {
-          setState(() {
-            _student.profilePicture = croppedFile.path;
-          });
-          await _student.save();
-        }
-      }
-    } catch (e) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error picking or cropping image: $e')),
-      );
-    }
-  }
-
-  Future<bool?> _showImagePreviewDialog(String imagePath) {
-    return showDialog<bool>(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Preview'),
-          content: Image.file(File(imagePath)),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('Cancel'),
-              onPressed: () => Navigator.of(context).pop(false),
+      if (kIsWeb) {
+        // For web, we'll just return the picked image path without cropping
+        return pickedImage.path;
+      } else {
+        // For mobile, we'll use the image_cropper
+        final croppedFile = await ImageCropper().cropImage(
+          sourcePath: pickedImage.path,
+          aspectRatio: const CropAspectRatio(ratioX: 1, ratioY: 1),
+          compressFormat: ImageCompressFormat.jpg,
+          compressQuality: 100,
+          uiSettings: [
+            AndroidUiSettings(
+              toolbarTitle: 'Crop Image',
+              toolbarColor: Colors.deepOrange,
+              toolbarWidgetColor: Colors.white,
+              initAspectRatio: CropAspectRatioPreset.square,
+              lockAspectRatio: true,
             ),
-            TextButton(
-              child: const Text('Save'),
-              onPressed: () => Navigator.of(context).pop(true),
+            IOSUiSettings(
+              title: 'Crop Image',
+              aspectRatioLockEnabled: true,
+              resetAspectRatioEnabled: false,
             ),
           ],
         );
-      },
-    );
+        return croppedFile?.path;
+      }
+    } catch (e) {
+      return null;
+    }
+  }
+
+  Future<void> _pickImage() async {
+    final imagePath = await _pickAndProcessImage();
+    if (imagePath != null) {
+      setState(() {
+        _student.profilePicture = imagePath;
+      });
+      await _student.save();
+    }
   }
 
   Future<void> _deleteProfilePicture() async {
@@ -134,9 +114,28 @@ class _StudentDetailsScreenState extends State<StudentDetailsScreen> {
     if (await canLaunchUrl(launchUri)) {
       await launchUrl(launchUri);
     } else {
-      if (!mounted) return; // Ensure the context is still valid
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Could not launch phone dialer')),
+      );
+    }
+  }
+
+  Widget _buildProfileImage() {
+    if (_student.profilePicture == null) {
+      return const CircleAvatar(
+        radius: 60,
+        child: Icon(Icons.add_a_photo, size: 40),
+      );
+    } else if (kIsWeb) {
+      return CircleAvatar(
+        radius: 60,
+        backgroundImage: NetworkImage(_student.profilePicture!),
+      );
+    } else {
+      return CircleAvatar(
+        radius: 60,
+        backgroundImage: FileImage(File(_student.profilePicture!)),
       );
     }
   }
@@ -161,15 +160,7 @@ class _StudentDetailsScreenState extends State<StudentDetailsScreen> {
               children: [
                 GestureDetector(
                   onTap: _pickImage,
-                  child: CircleAvatar(
-                    radius: 60,
-                    backgroundImage: _student.profilePicture != null
-                        ? FileImage(File(_student.profilePicture!))
-                        : null,
-                    child: _student.profilePicture == null
-                        ? const Icon(Icons.add_a_photo, size: 40)
-                        : null,
-                  ),
+                  child: _buildProfileImage(),
                 ),
                 if (_student.profilePicture != null)
                   Positioned(

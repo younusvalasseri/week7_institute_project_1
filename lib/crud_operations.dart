@@ -5,26 +5,26 @@ import 'models/employee.dart';
 import 'models/student.dart';
 
 class CRUDOperations {
-  // transactions - Read
+  // Transactions - Read
   static List<AccountTransaction> readAllTransactions() {
     final box = Hive.box<AccountTransaction>('transactions');
     return box.values.toList();
   }
 
-  // transactions - add-new line - Update
+  // Transactions - Create
   static Future<void> createTransaction(AccountTransaction transaction) async {
     final box = Hive.box<AccountTransaction>('transactions');
     await box.add(transaction);
   }
 
-//transactions - Edit current line - Update
+  // Transactions - Update
   static Future<void> updateTransactionWithKey(
       int key, AccountTransaction transaction) async {
     final box = Hive.box<AccountTransaction>('transactions');
     await box.put(key, transaction);
   }
 
-  // transactions - Delete
+  // Transactions - Delete
   static Future<void> deleteTransaction(AccountTransaction transaction) async {
     await transaction.delete();
   }
@@ -35,7 +35,7 @@ class CRUDOperations {
     return box.values.toList();
   }
 
-  // Categories - add - new line - Update
+  // Categories - Create
   static Future<void> createCategory(Category category) async {
     final box = Hive.box<Category>('categories');
     await box.add(category);
@@ -46,49 +46,58 @@ class CRUDOperations {
     await category.delete();
   }
 
-  // Students- Read
+  // Students - Read
   static List<Student> readAllStudents() {
     final box = Hive.box<Student>('students');
     return box.values.toList();
   }
 
   // Students - Update
-  static Future<void> updateStudents(int key, Student students) async {
+  static Future<void> updateStudent(String admNumber, Student student) async {
     final box = Hive.box<Student>('students');
-    await box.put(key, students);
+    await box.put(admNumber, student);
   }
 
-  // Students- Add new line
+  // Students - Create
   static Future<void> createStudent(Student student) async {
     final box = Hive.box<Student>('students');
-    await box.add(student);
+    if (box.containsKey(student.admNumber)) {
+      throw Exception('Admission number already used!');
+    }
+    await box.put(student.admNumber, student);
   }
 
   // Students - Delete
   static Future<void> deleteStudent(Student student) async {
-    await student.delete();
+    final box = Hive.box<Student>('students');
+    await box.delete(student.admNumber);
   }
 
-  // Employees - read
+  // Employees - Read
   static List<Employee> readAllEmployees() {
     final box = Hive.box<Employee>('employees');
     return box.values.toList();
   }
 
   // Employees - Update
-  static Future<void> updateEmployee(int key, Employee employee) async {
+  static Future<void> updateEmployee(
+      String empNumber, Employee employee) async {
     final box = Hive.box<Employee>('employees');
-    await box.put(key, employee);
+    await box.put(empNumber, employee);
   }
 
-  // Employees - Add new line
+  // Employees - Create
   static Future<void> createEmployee(Employee employee) async {
     final box = Hive.box<Employee>('employees');
-    await box.add(employee);
+    if (box.containsKey(employee.empNumber)) {
+      throw Exception('Employee number already used!');
+    }
+    await box.put(employee.empNumber, employee);
   }
 
-// Employees - Delete
+  // Employees - Delete
   static Future<void> deleteEmployee(Employee employee) async {
-    await employee.delete();
+    final box = Hive.box<Employee>('employees');
+    await box.delete(employee.empNumber);
   }
 }

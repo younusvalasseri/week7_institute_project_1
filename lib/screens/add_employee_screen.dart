@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:week7_institute_project_1/generated/l10n.dart';
 import 'package:week7_institute_project_1/models/employee.dart';
 import '../crud_operations.dart';
@@ -16,12 +17,13 @@ class _AddEmployeeScreenState extends State<AddEmployeeScreen> {
   final formKey = GlobalKey<FormState>();
   late String empNumber, name, position, phone, address, role;
   late bool isActive;
+  late Box<Employee> employeesBox;
 
   @override
   void initState() {
     super.initState();
+    employeesBox = Hive.box<Employee>('employees');
     empNumber = widget.employee?.empNumber ?? '';
-
     name = widget.employee?.name ?? '';
     position = widget.employee?.position ?? '';
     phone = widget.employee?.phone ?? '';
@@ -46,7 +48,8 @@ class _AddEmployeeScreenState extends State<AddEmployeeScreen> {
             mainAxisSize: MainAxisSize.min,
             children: [
               buildTextFormField(
-                  'Employee Number', empNumber, (value) => empNumber = value!),
+                  'Employee Number', empNumber, (value) => empNumber = value!,
+                  validator: _validateEmpNumber),
               buildTextFormField('Name', name, (value) => name = value!),
               buildTextFormField(
                   'Position', position, (value) => position = value!),
@@ -89,7 +92,7 @@ class _AddEmployeeScreenState extends State<AddEmployeeScreen> {
     );
   }
 
-  void _saveEmployee() async {
+  Future<void> _saveEmployee() async {
     if (formKey.currentState!.validate()) {
       formKey.currentState!.save();
       final newEmployee = Employee()
@@ -101,14 +104,22 @@ class _AddEmployeeScreenState extends State<AddEmployeeScreen> {
         ..role = role
         ..isActive = isActive;
 
-      if (widget.employee == null) {
-        await CRUDOperations.createEmployee(newEmployee);
-      } else {
-        await CRUDOperations.updateEmployee(widget.employee!.key, newEmployee);
-      }
+      try {
+        if (widget.employee == null) {
+          await CRUDOperations.createEmployee(newEmployee);
+        } else {
+          await CRUDOperations.updateEmployee(empNumber, newEmployee);
+        }
 
-      if (mounted) {
-        Navigator.of(context).pop();
+        if (mounted) {
+          Navigator.of(context).pop();
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(e.toString())),
+          );
+        }
       }
     }
   }
@@ -117,6 +128,16 @@ class _AddEmployeeScreenState extends State<AddEmployeeScreen> {
     final RegExp phoneExp = RegExp(r'^\d{10}$');
     if (value == null || !phoneExp.hasMatch(value)) {
       return 'Enter a valid phone number';
+    }
+    return null;
+  }
+
+  String? _validateEmpNumber(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Required';
+    }
+    if (widget.employee == null && employeesBox.containsKey(value)) {
+      return 'Employee number already used!';
     }
     return null;
   }

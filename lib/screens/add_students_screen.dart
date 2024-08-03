@@ -62,6 +62,7 @@ class _AddStudentScreenState extends State<AddStudentScreen> {
                   initialValue: admNumber,
                   labelText: 'Admission Number',
                   onSaved: (value) => admNumber = value!,
+                  validator: _validateAdmNumber,
                 ),
                 buildTextFormField(
                   initialValue: name,
@@ -227,9 +228,9 @@ class _AddStudentScreenState extends State<AddStudentScreen> {
       final navigator = Navigator.of(context); // Store the navigator context
 
       if (widget.student == null) {
-        CRUDOperations.createStudent(newStudent);
+        await CRUDOperations.createStudent(newStudent);
       } else {
-        await CRUDOperations.updateStudents(widget.student!.key, newStudent);
+        await CRUDOperations.updateStudent(admNumber, newStudent);
       }
 
       navigator.pop(); // Use the stored navigator context
@@ -240,6 +241,17 @@ class _AddStudentScreenState extends State<AddStudentScreen> {
     final RegExp phoneExp = RegExp(r'^\d{10}$');
     if (value == null || !phoneExp.hasMatch(value)) {
       return 'Enter a valid phone number';
+    }
+    return null;
+  }
+
+  String? _validateAdmNumber(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Required';
+    }
+    if (widget.student == null &&
+        Hive.box<Student>('students').containsKey(value)) {
+      return 'Admission number already used!';
     }
     return null;
   }
